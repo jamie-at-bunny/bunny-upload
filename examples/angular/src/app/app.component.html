@@ -1,7 +1,8 @@
 <main>
   <h1>Bunny Upload — Angular Example</h1>
-  <p>Drop files below to upload them to Bunny Storage.</p>
 
+  <h2>Drop-in Component</h2>
+  <p>Everything built in — drop zone, file list, progress bars.</p>
   <bunny-upload
     [accept]="['image/*']"
     maxSize="10mb"
@@ -9,11 +10,47 @@
     (completed)="onComplete($event)"
   />
 
+  <hr style="margin: 40px 0" />
+
+  <h2>Custom Dropzone</h2>
+  <p>Full control over the UI with the directive.</p>
+  <div
+    bunnyDropzone
+    #dropzone="bunnyDropzone"
+    [accept]="['image/*']"
+    maxSize="10mb"
+    [maxFiles]="5"
+    (completed)="onComplete($event)"
+    (stateChange)="onDropzoneStateChange($event)"
+    (click)="dropzone.openFilePicker()"
+    style="border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s"
+  >
+    <p>Drag images here or click to browse</p>
+  </div>
+
+  @if (dropzoneFiles.length > 0) {
+    <ul style="list-style: none; padding: 0; margin-top: 16px">
+      @for (file of dropzoneFiles; track file.id) {
+        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee">
+          <span>
+            <strong>{{ file.name }}</strong>
+            <span style="color: #888; margin-left: 8px">{{ formatBytes(file.size) }}</span>
+          </span>
+          <span>
+            @if (file.status === "uploading") { {{ file.progress }}% }
+            @if (file.status === "complete") { ✓ }
+            @if (file.status === "error") { <span style="color: red">{{ file.error }}</span> }
+          </span>
+        </li>
+      }
+    </ul>
+  }
+
   @if (uploadedFiles.length > 0) {
     <h2>Uploaded Files</h2>
     <ul>
       @for (file of uploadedFiles; track file.url) {
-        <li>{{ file.name }} — {{ file.url }}</li>
+        <li><a [href]="file.url" target="_blank">{{ file.name }}</a></li>
       }
     </ul>
   }

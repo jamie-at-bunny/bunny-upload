@@ -7,13 +7,13 @@ const handler = createBunnyUploadHandler({
     maxFiles: 5,
   },
   getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-  onBeforeUpload: (_file, req) => {
-    const cookie = req.headers.get("cookie");
+  // onBeforeUpload: (_file, req) => {
+  //   const cookie = req.headers.get("cookie");
 
-    if (!cookie?.includes("session=")) {
-      throw new UploadError("Unauthorized", 401);
-    }
-  },
+  //   if (!cookie?.includes("session=")) {
+  //     throw new UploadError("Unauthorized", 401);
+  //   }
+  // },
 });
 
 const server = Bun.serve({

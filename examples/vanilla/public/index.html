@@ -8,6 +8,7 @@
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
       h1 { margin-bottom: 8px; }
+      h2 { margin-top: 32px; margin-bottom: 8px; }
       p { color: #666; margin-bottom: 24px; }
 
       .dropzone {
@@ -27,9 +28,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 8px 12px;
-        border: 1px solid #eee;
-        border-radius: 6px;
-        margin-bottom: 8px;
+        border-bottom: 1px solid #eee;
       }
       .file-name { font-weight: 500; }
       .file-size { color: #888; font-size: 0.85em; margin-left: 8px; }
@@ -61,7 +60,6 @@
       }
       .remove:hover { color: #c00; }
 
-      h2 { margin-top: 24px; margin-bottom: 8px; }
       .uploaded-list { list-style: none; }
       .uploaded-list li { padding: 4px 0; }
       .uploaded-list a { color: #f60; }
@@ -72,7 +70,6 @@
     <p>Drop files below to upload them to Bunny Storage.</p>
 
     <div class="dropzone" id="dropzone">
-      <input type="file" id="file-input" multiple accept="image/*" hidden />
       Drop files here or click to browse
     </div>
 
@@ -85,92 +82,70 @@
 
     <script src="/bunny-upload.js"></script>
     <script>
-      const uploader = BunnyUpload.createUploader({
+      const dropzoneEl = document.getElementById("dropzone");
+      const fileList = document.getElementById("file-list");
+      const uploadedSection = document.getElementById("uploaded-section");
+      const uploadedList = document.getElementById("uploaded-list");
+
+      // createDropzone wires up drag-and-drop + file picker on any element
+      const dropzone = BunnyUpload.createDropzone(dropzoneEl, {
         restrictions: {
           allowedTypes: ["image/*"],
           maxFileSize: "10mb",
           maxFiles: 5,
         },
-      });
+        onDragOver: (isDragOver) => {
+          dropzoneEl.classList.toggle("active", isDragOver);
+        },
+        onStateChange: (files) => {
+          fileList.innerHTML = files
+            .map((f) => {
+              let status = "";
+              if (f.status === "uploading") {
+                status =
+                  '<div class="progress">' +
+                  '<div class="progress-bar" style="width: ' + f.progress + '%"></div>' +
+                  "</div>";
+              } else if (f.status === "complete") {
+                status = '<span class="file-status complete">✓</span>';
+              } else if (f.status === "error") {
+                status = '<span class="file-status error">' + f.error + "</span>";
+              }
 
-      const dropzone = document.getElementById("dropzone");
-      const fileInput = document.getElementById("file-input");
-      const fileList = document.getElementById("file-list");
-      const uploadedSection = document.getElementById("uploaded-section");
-      const uploadedList = document.getElementById("uploaded-list");
+              const remove =
+                f.status === "idle" || f.status === "error"
+                  ? '<button class="remove" data-id="' + f.id + '">×</button>'
+                  : "";
 
-      // Drag and drop
-      dropzone.addEventListener("click", () => fileInput.click());
-      dropzone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropzone.classList.add("active");
-      });
-      dropzone.addEventListener("dragleave", () => {
-        dropzone.classList.remove("active");
-      });
-      dropzone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropzone.classList.remove("active");
-        if (e.dataTransfer.files.length) {
-          uploader.addFiles(e.dataTransfer.files);
-        }
-      });
-      fileInput.addEventListener("change", () => {
-        if (fileInput.files.length) {
-          uploader.addFiles(fileInput.files);
-          fileInput.value = "";
-        }
-      });
+              return (
+                "<li>" +
+                '<span><span class="file-name">' + f.name + "</span>" +
+                '<span class="file-size">' + BunnyUpload.formatBytes(f.size) + "</span></span>" +
+                status +
+                remove +
+                "</li>"
+              );
+            })
+            .join("");
 
-      // Render file list on state change
-      uploader.on("state-change", (files) => {
-        fileList.innerHTML = files
-          .map((f) => {
-            let status = "";
-            if (f.status === "uploading") {
-              status =
-                '<div class="progress">' +
-                '<div class="progress-bar" style="width: ' + f.progress + '%"></div>' +
-                "</div>";
-            } else if (f.status === "complete") {
-              status = '<span class="file-status complete">Uploaded</span>';
-            } else if (f.status === "error") {
-              status = '<span class="file-status error">' + f.error + "</span>";
-            }
-
-            const remove =
-              f.status === "idle" || f.status === "error"
-                ? '<button class="remove" data-id="' + f.id + '">&times;</button>'
-                : "";
-
-            return (
-              "<li>" +
-              '<span><span class="file-name">' + f.name + "</span>" +
-              '<span class="file-size">' + BunnyUpload.formatBytes(f.size) + "</span></span>" +
-              status +
-              remove +
-              "</li>"
-            );
-          })
-          .join("");
-
-        // Bind remove buttons
-        fileList.querySelectorAll(".remove").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            uploader.removeFile(btn.dataset.id);
+          // Bind remove buttons
+          fileList.querySelectorAll(".remove").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              dropzone.uploader.removeFile(btn.dataset.id);
+            });
           });
-        });
+        },
+        onComplete: (results) => {
+          uploadedSection.hidden = false;
+          results.forEach((result) => {
+            uploadedList.innerHTML +=
+              '<li><a href="' + result.url + '" target="_blank">' + result.name + "</a></li>";
+          });
+        },
       });
 
-      // Auto-upload when files are added
-      uploader.on("file-added", async () => {
-        const results = await uploader.upload();
-        results.forEach((result) => {
-          uploadedSection.hidden = false;
-          uploadedList.innerHTML +=
-            '<li><a href="' + result.url + '" target="_blank">' + result.name + "</a></li>";
-        });
-      });
+      // Click the dropzone to open file picker
+      dropzoneEl.addEventListener("click", () => dropzone.openFilePicker());
     </script>
   </body>
 </html>
