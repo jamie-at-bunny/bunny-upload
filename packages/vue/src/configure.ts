@@ -1,5 +1,5 @@
 import { defineComponent, h, type PropType } from "vue";
-import type { UploadResult, FileState } from "@bunny-upload/core";
+import type { UploadResult, FileState } from "@bunny.net/upload-core";
 import { BunnyUpload } from "./BunnyUpload";
 import { useBunnyUpload, type UseBunnyUploadOptions } from "./use-bunny-upload";
 

@@ -8,10 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
-    "@bunny-upload/core": "workspace:*",
-    "@bunny-upload/handler": "workspace:*",
-    "@bunny-upload/next": "workspace:*",
-    "@bunny-upload/react": "workspace:*",
+    "@bunny.net/upload-core": "workspace:*",
+    "@bunny.net/upload-handler": "workspace:*",
+    "@bunny.net/upload-next": "workspace:*",
+    "@bunny.net/upload-react": "workspace:*",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

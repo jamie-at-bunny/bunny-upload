@@ -8,8 +8,8 @@
     "build": "react-router build"
   },
   "dependencies": {
-    "@bunny-upload/handler": "workspace:*",
-    "@bunny-upload/react": "workspace:*",
+    "@bunny.net/upload-handler": "workspace:*",
+    "@bunny.net/upload-react": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.0.0",

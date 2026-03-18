@@ -13,8 +13,8 @@
     "@angular/core": "^19.0.0",
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
-    "@bunny-upload/angular": "workspace:*",
-    "@bunny-upload/core": "workspace:*",
+    "@bunny.net/upload-angular": "workspace:*",
+    "@bunny.net/upload-core": "workspace:*",
     "rxjs": "^7.8.0",
     "tslib": "^2.6.0",
     "zone.js": "^0.15.0"

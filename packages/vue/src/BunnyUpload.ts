@@ -1,5 +1,5 @@
 import { defineComponent, ref, h, type PropType } from "vue";
-import { formatBytes, type UploadResult } from "@bunny-upload/core";
+import { formatBytes, type UploadResult } from "@bunny.net/upload-core";
 import { useBunnyUpload } from "./use-bunny-upload";
 
 export const BunnyUpload = defineComponent({

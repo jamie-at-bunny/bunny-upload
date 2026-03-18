@@ -4,7 +4,7 @@ import {
   type FileState,
   type Restrictions,
   type UploadResult,
-} from "@bunny-upload/core";
+} from "@bunny.net/upload-core";
 
 export interface UseBunnyUploadOptions {
   endpoint?: string;

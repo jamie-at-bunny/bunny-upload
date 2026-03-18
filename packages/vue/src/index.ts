@@ -5,4 +5,4 @@ export { configureBunnyUpload } from "./configure";
 export type { ConfigureOptions } from "./configure";
 
 // Re-export commonly needed types from core
-export type { FileState, UploadResult } from "@bunny-upload/core";
+export type { FileState, UploadResult } from "@bunny.net/upload-core";

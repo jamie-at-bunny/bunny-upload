@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
-import type { FileState, UploadResult } from "@bunny-upload/core";
-import { formatBytes } from "@bunny-upload/core";
+import type { FileState, UploadResult } from "@bunny.net/upload-core";
+import { formatBytes } from "@bunny.net/upload-core";
 import { useBunnyUpload } from "./use-bunny-upload";
 
 export interface BunnyUploadProps {

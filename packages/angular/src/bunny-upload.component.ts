@@ -8,7 +8,7 @@ import {
   ElementRef,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { formatBytes, type UploadResult } from "@bunny-upload/core";
+import { formatBytes, type UploadResult } from "@bunny.net/upload-core";
 import { BunnyUploadService } from "./bunny-upload.service";
 
 @Component({

@@ -1,5 +1,5 @@
 {
-  "name": "@bunny-upload/vue",
+  "name": "@bunny.net/upload-vue",
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -26,7 +26,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@bunny-upload/core": "workspace:*"
+    "@bunny.net/upload-core": "workspace:*"
   },
   "peerDependencies": {
     "vue": "^3.3.0"

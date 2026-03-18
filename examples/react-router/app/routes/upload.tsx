@@ -1,4 +1,4 @@
-import { createBunnyUploadHandler, UploadError } from "@bunny-upload/handler";
+import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload-handler";
 import type { Route } from "./+types/upload";
 
 const handler = createBunnyUploadHandler({

@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@bunny-upload/core": "workspace:*",
-    "@bunny-upload/vue": "workspace:*",
+    "@bunny.net/upload-core": "workspace:*",
+    "@bunny.net/upload-vue": "workspace:*",
     "vue": "^3.5.0"
   },
   "devDependencies": {

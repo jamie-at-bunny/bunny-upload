@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { createBunnyUploadHandler, UploadError } from "@bunny-upload/handler";
+import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload-handler";
 
 const app = new Hono();
 

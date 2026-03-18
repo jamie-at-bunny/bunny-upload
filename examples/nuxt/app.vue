@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { BunnyUpload, useBunnyUpload, type UploadResult } from "@bunny-upload/vue";
+import { BunnyUpload, useBunnyUpload, type UploadResult } from "@bunny.net/upload-vue";
 
 const uploadedFiles = ref<UploadResult[]>([]);
 

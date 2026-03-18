@@ -9,10 +9,10 @@
     "preview": "nuxt preview"
   },
   "dependencies": {
-    "@bunny-upload/core": "workspace:*",
-    "@bunny-upload/handler": "workspace:*",
-    "@bunny-upload/nuxt": "workspace:*",
-    "@bunny-upload/vue": "workspace:*",
+    "@bunny.net/upload-core": "workspace:*",
+    "@bunny.net/upload-handler": "workspace:*",
+    "@bunny.net/upload-nuxt": "workspace:*",
+    "@bunny.net/upload-vue": "workspace:*",
     "nuxt": "^3.15.0",
     "vue": "^3.5.0"
   },

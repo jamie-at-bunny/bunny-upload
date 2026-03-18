@@ -2,7 +2,7 @@ import {
   createStartHandler,
   defaultStreamHandler,
 } from "@tanstack/react-start/server";
-import { createBunnyUploadHandler, UploadError } from "@bunny-upload/handler";
+import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload-handler";
 
 const uploadHandler = createBunnyUploadHandler({
   restrictions: {

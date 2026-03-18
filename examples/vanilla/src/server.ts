@@ -1,4 +1,4 @@
-import { createBunnyUploadHandler, UploadError } from "@bunny-upload/handler";
+import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload-handler";
 import { resolve } from "node:path";
 
 const handler = createBunnyUploadHandler({
@@ -29,7 +29,7 @@ const server = Bun.serve({
       return handler(request);
     }
 
-    // Serve the IIFE bundle from @bunny-upload/core
+    // Serve the IIFE bundle from @bunny.net/upload-core
     if (url.pathname === "/bunny-upload.js") {
       const file = Bun.file(resolve(coreDistDir, "index.global.js"));
       return new Response(file, {

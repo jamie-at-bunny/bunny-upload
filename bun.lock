@@ -18,8 +18,8 @@
         "@angular/core": "^19.0.0",
         "@angular/platform-browser": "^19.0.0",
         "@angular/platform-browser-dynamic": "^19.0.0",
-        "@bunny-upload/angular": "workspace:*",
-        "@bunny-upload/core": "workspace:*",
+        "@bunny.net/upload-angular": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
         "rxjs": "^7.8.0",
         "tslib": "^2.6.0",
         "zone.js": "^0.15.0",
@@ -35,7 +35,7 @@
       "name": "example-hono",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/handler": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
         "hono": "^4.0.0",
       },
     },
@@ -43,10 +43,10 @@
       "name": "example-nextjs",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/core": "workspace:*",
-        "@bunny-upload/handler": "workspace:*",
-        "@bunny-upload/next": "workspace:*",
-        "@bunny-upload/react": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
+        "@bunny.net/upload-next": "workspace:*",
+        "@bunny.net/upload-react": "workspace:*",
         "next": "^15.0.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -62,10 +62,10 @@
       "name": "example-nuxt",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/core": "workspace:*",
-        "@bunny-upload/handler": "workspace:*",
-        "@bunny-upload/nuxt": "workspace:*",
-        "@bunny-upload/vue": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
+        "@bunny.net/upload-nuxt": "workspace:*",
+        "@bunny.net/upload-vue": "workspace:*",
         "nuxt": "^3.15.0",
         "vue": "^3.5.0",
       },
@@ -77,8 +77,8 @@
       "name": "example-react-router",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/handler": "workspace:*",
-        "@bunny-upload/react": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
+        "@bunny.net/upload-react": "workspace:*",
         "@react-router/node": "^7.0.0",
         "@react-router/serve": "^7.0.0",
         "isbot": "^5.0.0",
@@ -98,16 +98,16 @@
       "name": "example-server",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/handler": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
       },
     },
     "examples/tanstack-start": {
       "name": "example-tanstack-start",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/core": "workspace:*",
-        "@bunny-upload/handler": "workspace:*",
-        "@bunny-upload/react": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
+        "@bunny.net/upload-react": "workspace:*",
         "@tanstack/react-router": "^1.120.0",
         "@tanstack/react-start": "^1.120.0",
         "react": "^19.0.0",
@@ -126,16 +126,16 @@
       "name": "example-vanilla",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/core": "workspace:*",
-        "@bunny-upload/handler": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
       },
     },
     "examples/vue": {
       "name": "example-vue",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/core": "workspace:*",
-        "@bunny-upload/vue": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
+        "@bunny.net/upload-vue": "workspace:*",
         "vue": "^3.5.0",
       },
       "devDependencies": {
@@ -145,7 +145,7 @@
       },
     },
     "packages/angular": {
-      "name": "@bunny-upload/angular",
+      "name": "@bunny.net/upload-angular",
       "version": "0.0.0",
       "dependencies": {
         "tslib": "^2.6.0",
@@ -155,7 +155,7 @@
         "@angular/compiler": "^19.0.0",
         "@angular/compiler-cli": "^19.0.0",
         "@angular/core": "^19.0.0",
-        "@bunny-upload/core": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
         "ng-packagr": "^19.0.0",
         "rxjs": "^7.8.0",
         "typescript": "~5.8.0",
@@ -164,11 +164,11 @@
       "peerDependencies": {
         "@angular/common": ">=17.0.0",
         "@angular/core": ">=17.0.0",
-        "@bunny-upload/core": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
       },
     },
     "packages/core": {
-      "name": "@bunny-upload/core",
+      "name": "@bunny.net/upload-core",
       "version": "0.0.0",
       "devDependencies": {
         "tsup": "^8.0.0",
@@ -177,7 +177,7 @@
       },
     },
     "packages/handler": {
-      "name": "@bunny-upload/handler",
+      "name": "@bunny.net/upload-handler",
       "version": "0.0.0",
       "dependencies": {
         "@bunny.net/storage-sdk": "^0.3.1",
@@ -190,10 +190,10 @@
       },
     },
     "packages/next": {
-      "name": "@bunny-upload/next",
+      "name": "@bunny.net/upload-next",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/handler": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
       },
       "devDependencies": {
         "next": "^15.0.0",
@@ -206,10 +206,10 @@
       },
     },
     "packages/nuxt": {
-      "name": "@bunny-upload/nuxt",
+      "name": "@bunny.net/upload-nuxt",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/handler": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
       },
       "devDependencies": {
         "h3": "^1.15.0",
@@ -222,10 +222,10 @@
       },
     },
     "packages/react": {
-      "name": "@bunny-upload/react",
+      "name": "@bunny.net/upload-react",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/core": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
       },
       "devDependencies": {
         "@types/react": "^19.0.0",
@@ -242,10 +242,10 @@
       },
     },
     "packages/vue": {
-      "name": "@bunny-upload/vue",
+      "name": "@bunny.net/upload-vue",
       "version": "0.0.0",
       "dependencies": {
-        "@bunny-upload/core": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
       },
       "devDependencies": {
         "tsup": "^8.0.0",
@@ -351,21 +351,21 @@
 
     "@bomb.sh/tab": ["@bomb.sh/tab@0.0.14", "", { "peerDependencies": { "cac": "^6.7.14", "citty": "^0.1.6 || ^0.2.0", "commander": "^13.1.0" }, "optionalPeers": ["cac", "citty", "commander"], "bin": { "tab": "dist/bin/cli.mjs" } }, "sha512-cHMk2LI430MVoX1unTt9oK1iZzQS4CYDz97MSxKLNErW69T43Z2QLFTpdS/3jVOIKrIADWfuxQ+nQNJkNV7E4w=="],
 
-    "@bunny-upload/angular": ["@bunny-upload/angular@workspace:packages/angular"],
-
-    "@bunny-upload/core": ["@bunny-upload/core@workspace:packages/core"],
-
-    "@bunny-upload/handler": ["@bunny-upload/handler@workspace:packages/handler"],
-
-    "@bunny-upload/next": ["@bunny-upload/next@workspace:packages/next"],
-
-    "@bunny-upload/nuxt": ["@bunny-upload/nuxt@workspace:packages/nuxt"],
-
-    "@bunny-upload/react": ["@bunny-upload/react@workspace:packages/react"],
-
-    "@bunny-upload/vue": ["@bunny-upload/vue@workspace:packages/vue"],
-
     "@bunny.net/storage-sdk": ["@bunny.net/storage-sdk@0.3.1", "", { "dependencies": { "dotenv": "^16.4.7", "zod": "^3.24.2" } }, "sha512-nHD+e+CxYBcSoZERkxI/7Qir/kZaCfBTT+ULgZNUitNSyZ4mWD3DbTy+sHwVfRyc6wQ0XYD//6LImi2PU9JoWg=="],
+
+    "@bunny.net/upload-angular": ["@bunny.net/upload-angular@workspace:packages/angular"],
+
+    "@bunny.net/upload-core": ["@bunny.net/upload-core@workspace:packages/core"],
+
+    "@bunny.net/upload-handler": ["@bunny.net/upload-handler@workspace:packages/handler"],
+
+    "@bunny.net/upload-next": ["@bunny.net/upload-next@workspace:packages/next"],
+
+    "@bunny.net/upload-nuxt": ["@bunny.net/upload-nuxt@workspace:packages/nuxt"],
+
+    "@bunny.net/upload-react": ["@bunny.net/upload-react@workspace:packages/react"],
+
+    "@bunny.net/upload-vue": ["@bunny.net/upload-vue@workspace:packages/vue"],
 
     "@changesets/apply-release-plan": ["@changesets/apply-release-plan@7.1.0", "", { "dependencies": { "@changesets/config": "^3.1.3", "@changesets/get-version-range-type": "^0.4.0", "@changesets/git": "^3.0.4", "@changesets/should-skip-package": "^0.1.2", "@changesets/types": "^6.1.0", "@manypkg/get-packages": "^1.1.3", "detect-indent": "^6.0.0", "fs-extra": "^7.0.1", "lodash.startcase": "^4.4.0", "outdent": "^0.5.0", "prettier": "^2.7.1", "resolve-from": "^5.0.0", "semver": "^7.5.3" } }, "sha512-yq8ML3YS7koKQ/9bk1PqO0HMzApIFNwjlwCnwFEXMzNe8NpzeeYYKCmnhWJGkN8g7E51MnWaSbqRcTcdIxUgnQ=="],
 
@@ -2545,7 +2545,7 @@
 
     "@babel/plugin-transform-typescript/@babel/helper-annotate-as-pure": ["@babel/helper-annotate-as-pure@7.27.3", "", { "dependencies": { "@babel/types": "^7.27.3" } }, "sha512-fXSwMQqitTGeHLBC08Eq5yXz2m37E4pJX1qAU1+2cNedz/ifv/bVXft90VeSav5nFO61EcNgwr0aJxbyPaWBPg=="],
 
-    "@bunny-upload/angular/typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
+    "@bunny.net/upload-angular/typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
     "@changesets/apply-release-plan/prettier": ["prettier@2.8.8", "", { "bin": { "prettier": "bin-prettier.js" } }, "sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q=="],
 

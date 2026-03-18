@@ -1,5 +1,5 @@
 {
-  "name": "@bunny-upload/next",
+  "name": "@bunny.net/upload-next",
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -26,7 +26,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@bunny-upload/handler": "workspace:*"
+    "@bunny.net/upload-handler": "workspace:*"
   },
   "peerDependencies": {
     "next": ">=14.0.0"

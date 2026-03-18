@@ -1,4 +1,4 @@
-export type { HandlerOptions } from "@bunny-upload/handler";
+export type { HandlerOptions } from "@bunny.net/upload-handler";
 
 type Handler = (request: Request) => Promise<Response>;
 

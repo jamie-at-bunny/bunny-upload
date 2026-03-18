@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BunnyUpload } from "@bunny-upload/react";
-import type { UploadResult } from "@bunny-upload/core";
+import { BunnyUpload } from "@bunny.net/upload-react";
+import type { UploadResult } from "@bunny.net/upload-core";
 import { useState } from "react";
 
 export const Route = createFileRoute("/")({

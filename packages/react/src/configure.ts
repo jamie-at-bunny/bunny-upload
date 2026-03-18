@@ -1,4 +1,4 @@
-import type { UploadResult, FileState } from "@bunny-upload/core";
+import type { UploadResult, FileState } from "@bunny.net/upload-core";
 import { BunnyUpload, type BunnyUploadProps } from "./bunny-upload";
 import { useBunnyUpload, type UseBunnyUploadOptions } from "./use-bunny-upload";
 

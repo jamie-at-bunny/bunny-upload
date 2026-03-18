@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { BunnyUploadComponent, type UploadResult } from "@bunny-upload/angular";
+import { BunnyUploadComponent, type UploadResult } from "@bunny.net/upload-angular";
 
 @Component({
   selector: "app-root",

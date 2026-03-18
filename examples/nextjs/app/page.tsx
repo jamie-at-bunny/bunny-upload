@@ -1,6 +1,6 @@
 "use client";
 
-import { BunnyUpload, useBunnyUpload } from "@bunny-upload/react";
+import { BunnyUpload, useBunnyUpload } from "@bunny.net/upload-react";
 
 export default function Home() {
   return (

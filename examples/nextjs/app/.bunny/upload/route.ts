@@ -1,5 +1,5 @@
-import { serveBunnyUpload } from "@bunny-upload/next";
-import { createBunnyUploadHandler, UploadError } from "@bunny-upload/handler";
+import { serveBunnyUpload } from "@bunny.net/upload-next";
+import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload-handler";
 
 export const { POST } = serveBunnyUpload(
   createBunnyUploadHandler({

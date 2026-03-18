@@ -8,9 +8,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@bunny-upload/handler": "workspace:*",
-    "@bunny-upload/react": "workspace:*",
-    "@bunny-upload/core": "workspace:*",
+    "@bunny.net/upload-handler": "workspace:*",
+    "@bunny.net/upload-react": "workspace:*",
+    "@bunny.net/upload-core": "workspace:*",
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-start": "^1.120.0",
     "react": "^19.0.0",

@@ -1,5 +1,5 @@
-import { defineBunnyUploadHandler } from "@bunny-upload/nuxt";
-import { createBunnyUploadHandler, UploadError } from "@bunny-upload/handler";
+import { defineBunnyUploadHandler } from "@bunny.net/upload-nuxt";
+import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload-handler";
 
 export default defineBunnyUploadHandler(
   createBunnyUploadHandler({

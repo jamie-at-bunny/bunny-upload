@@ -5,7 +5,7 @@ import {
   type Restrictions,
   type UploadResult,
   type UploaderOptions,
-} from "@bunny-upload/core";
+} from "@bunny.net/upload-core";
 
 @Injectable()
 export class BunnyUploadService {
