@@ -1,0 +1,27 @@
+{
+  "name": "example-react-router",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev",
+    "build": "react-router build"
+  },
+  "dependencies": {
+    "@bunny-upload/handler": "workspace:*",
+    "@bunny-upload/react": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.0.0",
+    "@react-router/node": "^7.0.0",
+    "@react-router/serve": "^7.0.0",
+    "isbot": "^5.0.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.5.0",
+    "vite": "^6.0.0"
+  }
+}

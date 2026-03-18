@@ -1,0 +1,27 @@
+{
+  "name": "example-tanstack-start",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@bunny-upload/handler": "workspace:*",
+    "@bunny-upload/react": "workspace:*",
+    "@bunny-upload/core": "workspace:*",
+    "@tanstack/react-router": "^1.120.0",
+    "@tanstack/react-start": "^1.120.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "typescript": "^5.5.0",
+    "vite": "^6.0.0",
+    "vite-tsconfig-paths": "^5.0.0"
+  }
+}

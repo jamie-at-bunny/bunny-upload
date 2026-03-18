@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [
+    ["@bunny-upload/core", "@bunny-upload/handler", "@bunny-upload/react", "@bunny-upload/angular", "@bunny-upload/next", "@bunny-upload/vue", "@bunny-upload/nuxt"]
+  ],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}

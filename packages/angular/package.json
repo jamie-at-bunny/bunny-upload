@@ -1,0 +1,31 @@
+{
+  "name": "@bunny-upload/angular",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/fesm2022/bunny-upload-angular.mjs",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "tslib": "^2.6.0"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=17.0.0",
+    "@angular/common": ">=17.0.0",
+    "@bunny-upload/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@angular/common": "^19.0.0",
+    "@angular/compiler": "^19.0.0",
+    "@angular/compiler-cli": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@bunny-upload/core": "workspace:*",
+    "ng-packagr": "^19.0.0",
+    "rxjs": "^7.8.0",
+    "typescript": "~5.8.0",
+    "zone.js": "^0.15.0"
+  }
+}

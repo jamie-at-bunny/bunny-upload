@@ -1,0 +1,20 @@
+<main>
+  <h1>Bunny Upload — Angular Example</h1>
+  <p>Drop files below to upload them to Bunny Storage.</p>
+
+  <bunny-upload
+    [accept]="['image/*']"
+    maxSize="10mb"
+    [maxFiles]="5"
+    (completed)="onComplete($event)"
+  />
+
+  @if (uploadedFiles.length > 0) {
+    <h2>Uploaded Files</h2>
+    <ul>
+      @for (file of uploadedFiles; track file.url) {
+        <li>{{ file.name }} — {{ file.url }}</li>
+      }
+    </ul>
+  }
+</main>

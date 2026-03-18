@@ -1,0 +1,13 @@
+{
+  "name": "example-vanilla",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/server.ts"
+  },
+  "dependencies": {
+    "@bunny-upload/core": "workspace:*",
+    "@bunny-upload/handler": "workspace:*"
+  }
+}
