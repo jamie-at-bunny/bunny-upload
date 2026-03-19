@@ -11,13 +11,13 @@ const uploadHandler = createBunnyUploadHandler({
     maxFiles: 5,
   },
   getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-  onBeforeUpload: (_file, req) => {
-    const cookie = req.headers.get("cookie");
-
-    if (!cookie?.includes("session=")) {
-      throw new UploadError("Unauthorized", 401);
-    }
-  },
+  // Uncomment to require auth:
+  // onBeforeUpload: (_file, req) => {
+  //   const cookie = req.headers.get("cookie");
+  //   if (!cookie?.includes("session=")) {
+  //     throw new UploadError("Unauthorized", 401);
+  //   }
+  // },
 });
 
 const startHandler = createStartHandler(defaultStreamHandler);

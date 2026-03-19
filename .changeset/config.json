@@ -12,7 +12,8 @@
       "@bunny.net/upload-angular",
       "@bunny.net/upload-next",
       "@bunny.net/upload-vue",
-      "@bunny.net/upload-nuxt"
+      "@bunny.net/upload-nuxt",
+      "@bunny.net/upload-solid"
     ]
   ],
   "access": "public",

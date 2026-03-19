@@ -1,5 +1,5 @@
-import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload-handler";
-import type { Route } from "./+types/upload";
+import type { APIEvent } from "@solidjs/start/server";
+import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload";
 
 const handler = createBunnyUploadHandler({
   restrictions: {
@@ -17,7 +17,6 @@ const handler = createBunnyUploadHandler({
   // },
 });
 
-// Resource route — action only, no UI
-export async function action({ request }: Route.ActionArgs) {
-  return handler(request);
+export async function POST(event: APIEvent) {
+  return handler(event.request);
 }

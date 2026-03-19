@@ -7,9 +7,9 @@ const handler = createBunnyUploadHandler({
     maxFiles: 5,
   },
   getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
+  // Uncomment to require auth:
   // onBeforeUpload: (_file, req) => {
   //   const cookie = req.headers.get("cookie");
-
   //   if (!cookie?.includes("session=")) {
   //     throw new UploadError("Unauthorized", 401);
   //   }

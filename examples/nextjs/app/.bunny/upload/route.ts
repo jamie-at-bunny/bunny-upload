@@ -9,17 +9,12 @@ export const { POST } = serveBunnyUpload(
       maxFiles: 5,
     },
     getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-    onBeforeUpload: (_file, req) => {
-      // The browser sends cookies automatically for same-origin requests.
-      // Use onBeforeUpload to validate the session before allowing uploads.
-      const cookie = req.headers.get("cookie");
-
-      if (!cookie?.includes("session=")) {
-        throw new UploadError("Unauthorized", 401);
-      }
-
-      // Validate the session however you like — next-auth, lucia, etc.
-      // const session = await getSession(cookie);
-    },
+    // Uncomment to require auth:
+    // onBeforeUpload: (_file, req) => {
+    //   const cookie = req.headers.get("cookie");
+    //   if (!cookie?.includes("session=")) {
+    //     throw new UploadError("Unauthorized", 401);
+    //   }
+    // },
   })
 );
