@@ -4,7 +4,16 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    ["@bunny.net/upload-core", "@bunny.net/upload-handler", "@bunny.net/upload-react", "@bunny.net/upload-angular", "@bunny.net/upload-next", "@bunny.net/upload-vue", "@bunny.net/upload-nuxt"]
+    [
+      "@bunny.net/upload",
+      "@bunny.net/upload-core",
+      "@bunny.net/upload-handler",
+      "@bunny.net/upload-react",
+      "@bunny.net/upload-angular",
+      "@bunny.net/upload-next",
+      "@bunny.net/upload-vue",
+      "@bunny.net/upload-nuxt"
+    ]
   ],
   "access": "public",
   "baseBranch": "main",

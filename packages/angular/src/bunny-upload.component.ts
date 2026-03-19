@@ -2,6 +2,7 @@ import {
   Component,
   input,
   output,
+  computed,
   inject,
   OnInit,
   ViewChild,
@@ -25,6 +26,7 @@ export class BunnyUploadComponent implements OnInit {
   readonly maxFiles = input<number>();
   readonly autoUpload = input(true);
   readonly className = input("");
+  readonly label = input("Choose file");
 
   readonly completed = output<UploadResult[]>();
   readonly errored = output<Error>();
@@ -32,7 +34,11 @@ export class BunnyUploadComponent implements OnInit {
   @ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
 
   uploadService = inject(BunnyUploadService);
-  isDragOver = false;
+
+  readonly latestFile = computed(() => {
+    const files = this.uploadService.files();
+    return files.length > 0 ? files[files.length - 1] : null;
+  });
 
   ngOnInit() {
     this.uploadService.configure({
@@ -49,25 +55,8 @@ export class BunnyUploadComponent implements OnInit {
     return this.accept()?.join(",") ?? "";
   }
 
-  hasIdleFiles(): boolean {
-    return this.uploadService.files().some((f) => f.status === "idle");
-  }
-
   formatFileSize(bytes: number): string {
     return formatBytes(bytes);
-  }
-
-  onDragOver(event: DragEvent) {
-    event.preventDefault();
-    this.isDragOver = true;
-  }
-
-  onDrop(event: DragEvent) {
-    event.preventDefault();
-    this.isDragOver = false;
-    if (event.dataTransfer?.files.length) {
-      this.handleFiles(event.dataTransfer.files);
-    }
   }
 
   onFileChange(event: Event) {
@@ -75,13 +64,6 @@ export class BunnyUploadComponent implements OnInit {
     if (input.files?.length) {
       this.handleFiles(input.files);
       input.value = "";
-    }
-  }
-
-  async retry() {
-    const results = await this.uploadService.upload();
-    if (results.length > 0) {
-      this.completed.emit(results);
     }
   }
 

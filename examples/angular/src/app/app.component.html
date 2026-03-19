@@ -1,57 +1,89 @@
 <main>
-  <h1>Bunny Upload — Angular Example</h1>
+  <h1>Bunny Upload — Angular</h1>
 
-  <h2>Drop-in Component</h2>
-  <p>Everything built in — drop zone, file list, progress bars.</p>
-  <bunny-upload
-    [accept]="['image/*']"
-    maxSize="10mb"
-    [maxFiles]="5"
-    (completed)="onComplete($event)"
-  />
+  <section>
+    <h2>Simple Button</h2>
+    <p>Pick a file and see its name + upload status inline.</p>
+    <bunny-upload
+      [accept]="['image/*']"
+      maxSize="10mb"
+      (completed)="onComplete($event)"
+    />
+  </section>
 
-  <hr style="margin: 40px 0" />
+  <section>
+    <h2>Upload Widget</h2>
+    <p>A button that opens a modal with dropzone, file list, and progress.</p>
+    <bunny-upload-widget
+      [accept]="['image/*']"
+      maxSize="10mb"
+      [maxFiles]="5"
+      (completed)="onComplete($event)"
+    />
+  </section>
 
-  <h2>Custom Dropzone</h2>
-  <p>Full control over the UI with the directive.</p>
-  <div
-    bunnyDropzone
-    #dropzone="bunnyDropzone"
-    [accept]="['image/*']"
-    maxSize="10mb"
-    [maxFiles]="5"
-    (completed)="onComplete($event)"
-    (stateChange)="onDropzoneStateChange($event)"
-    (click)="dropzone.openFilePicker()"
-    style="border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s"
-  >
-    <p>Drag images here or click to browse</p>
-  </div>
+  <section>
+    <h2>Custom Dropzone</h2>
+    <p>Full control over the UI with the directive.</p>
+    <div
+      bunnyDropzone
+      #dropzone="bunnyDropzone"
+      [accept]="['image/*']"
+      maxSize="10mb"
+      [maxFiles]="5"
+      (completed)="onComplete($event)"
+      (stateChange)="onDropzoneStateChange($event)"
+      (click)="dropzone.openFilePicker()"
+      style="border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s"
+    >
+      <p>Drag images here or click to browse</p>
+    </div>
 
-  @if (dropzoneFiles.length > 0) {
-    <ul style="list-style: none; padding: 0; margin-top: 16px">
-      @for (file of dropzoneFiles; track file.id) {
-        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee">
-          <span>
-            <strong>{{ file.name }}</strong>
-            <span style="color: #888; margin-left: 8px">{{ formatBytes(file.size) }}</span>
-          </span>
-          <span>
-            @if (file.status === "uploading") { {{ file.progress }}% }
-            @if (file.status === "complete") { ✓ }
-            @if (file.status === "error") { <span style="color: red">{{ file.error }}</span> }
-          </span>
-        </li>
-      }
-    </ul>
-  }
+    @if (dropzoneFiles.length > 0) {
+      <ul style="list-style: none; padding: 0; margin-top: 16px">
+        @for (file of dropzoneFiles; track file.id) {
+          <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee">
+            <span>
+              <strong>{{ file.name }}</strong>
+              <span style="color: #888; margin-left: 8px">{{ formatBytes(file.size) }}</span>
+            </span>
+            <span>
+              @if (file.status === "uploading") { {{ roundProgress(file.progress) }}% }
+              @if (file.status === "complete") { ✓ }
+              @if (file.status === "error") { <span style="color: red">{{ file.error }}</span> }
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
 
-  @if (uploadedFiles.length > 0) {
-    <h2>Uploaded Files</h2>
-    <ul>
-      @for (file of uploadedFiles; track file.url) {
-        <li><a [href]="file.url" target="_blank">{{ file.name }}</a></li>
-      }
-    </ul>
-  }
+  <section>
+    <h2>Headless Service</h2>
+    <p>Maximum control — just the service and methods, zero UI from us.</p>
+    <div style="display: flex; gap: 8px">
+      <label style="display: inline-block; padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer">
+        Add files
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          (change)="onHookFileChange($event)"
+          hidden
+        />
+      </label>
+      <button (click)="hookUpload()" [disabled]="hookService.isUploading() || hookService.files().length === 0" style="padding: 8px 16px">
+        {{ hookService.isUploading() ? "Uploading..." : "Upload" }}
+      </button>
+      <button (click)="hookService.reset()" [disabled]="hookService.files().length === 0" style="padding: 8px 16px">
+        Reset
+      </button>
+    </div>
+
+    <bunny-upload-file-list
+      [files]="hookService.files()"
+      (remove)="hookService.removeFile($event)"
+      (retry)="hookUpload()"
+    />
+  </section>
 </main>

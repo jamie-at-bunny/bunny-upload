@@ -6,10 +6,12 @@
     <title>Bunny Upload — Vanilla JS</title>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+      body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; }
       h1 { margin-bottom: 8px; }
       h2 { margin-top: 32px; margin-bottom: 8px; }
-      p { color: #666; margin-bottom: 24px; }
+      p.desc { color: #666; margin-bottom: 16px; }
+      section { margin-top: 40px; }
+      hr { border: none; border-top: 1px solid #eee; margin: 40px 0; }
 
       .dropzone {
         border: 2px dashed #ccc;
@@ -60,34 +62,53 @@
       }
       .remove:hover { color: #c00; }
 
-      .uploaded-list { list-style: none; }
-      .uploaded-list li { padding: 4px 0; }
-      .uploaded-list a { color: #f60; }
+      .btn {
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn:hover { background: #f5f5f5; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-row { display: flex; gap: 8px; }
     </style>
   </head>
   <body>
-    <h1>Bunny Upload</h1>
-    <p>Drop files below to upload them to Bunny Storage.</p>
+    <h1>Bunny Upload — Vanilla JS</h1>
 
-    <div class="dropzone" id="dropzone">
-      Drop files here or click to browse
-    </div>
+    <section>
+      <h2>Dropzone</h2>
+      <p class="desc">Drop files or click to browse. Auto-uploads on drop.</p>
 
-    <ul class="file-list" id="file-list"></ul>
+      <div class="dropzone" id="dropzone">
+        Drop files here or click to browse
+      </div>
+      <ul class="file-list" id="dropzone-files"></ul>
+    </section>
 
-    <div id="uploaded-section" hidden>
-      <h2>Uploaded Files</h2>
-      <ul class="uploaded-list" id="uploaded-list"></ul>
-    </div>
+    <section>
+      <h2>Manual Upload</h2>
+      <p class="desc">Pick files, then explicitly trigger the upload.</p>
+
+      <div class="btn-row">
+        <label class="btn">
+          Add files
+          <input type="file" multiple accept="image/*" id="manual-input" hidden />
+        </label>
+        <button class="btn" id="manual-upload" disabled>Upload</button>
+        <button class="btn" id="manual-reset" disabled>Reset</button>
+      </div>
+      <ul class="file-list" id="manual-files"></ul>
+    </section>
 
     <script src="/bunny-upload.js"></script>
     <script>
+      // ---------- Dropzone example ----------
       const dropzoneEl = document.getElementById("dropzone");
-      const fileList = document.getElementById("file-list");
-      const uploadedSection = document.getElementById("uploaded-section");
-      const uploadedList = document.getElementById("uploaded-list");
+      const dropzoneFileList = document.getElementById("dropzone-files");
 
-      // createDropzone wires up drag-and-drop + file picker on any element
       const dropzone = BunnyUpload.createDropzone(dropzoneEl, {
         restrictions: {
           allowedTypes: ["image/*"],
@@ -98,54 +119,90 @@
           dropzoneEl.classList.toggle("active", isDragOver);
         },
         onStateChange: (files) => {
-          fileList.innerHTML = files
-            .map((f) => {
-              let status = "";
-              if (f.status === "uploading") {
-                status =
-                  '<div class="progress">' +
-                  '<div class="progress-bar" style="width: ' + f.progress + '%"></div>' +
-                  "</div>";
-              } else if (f.status === "complete") {
-                status = '<span class="file-status complete">✓</span>';
-              } else if (f.status === "error") {
-                status = '<span class="file-status error">' + f.error + "</span>";
-              }
-
-              const remove =
-                f.status === "idle" || f.status === "error"
-                  ? '<button class="remove" data-id="' + f.id + '">×</button>'
-                  : "";
-
-              return (
-                "<li>" +
-                '<span><span class="file-name">' + f.name + "</span>" +
-                '<span class="file-size">' + BunnyUpload.formatBytes(f.size) + "</span></span>" +
-                status +
-                remove +
-                "</li>"
-              );
-            })
-            .join("");
-
-          // Bind remove buttons
-          fileList.querySelectorAll(".remove").forEach((btn) => {
-            btn.addEventListener("click", () => {
-              dropzone.uploader.removeFile(btn.dataset.id);
-            });
-          });
+          renderFileList(dropzoneFileList, files, dropzone.uploader);
         },
         onComplete: (results) => {
-          uploadedSection.hidden = false;
-          results.forEach((result) => {
-            uploadedList.innerHTML +=
-              '<li><a href="' + result.url + '" target="_blank">' + result.name + "</a></li>";
-          });
+          console.log("Dropzone uploaded:", results.map((r) => r.url));
         },
       });
 
-      // Click the dropzone to open file picker
       dropzoneEl.addEventListener("click", () => dropzone.openFilePicker());
+
+      // ---------- Manual upload example ----------
+      const manualInput = document.getElementById("manual-input");
+      const manualFileList = document.getElementById("manual-files");
+      const manualUploadBtn = document.getElementById("manual-upload");
+      const manualResetBtn = document.getElementById("manual-reset");
+
+      const uploader = BunnyUpload.createUploader({
+        restrictions: {
+          allowedTypes: ["image/*"],
+          maxFileSize: "10mb",
+          maxFiles: 5,
+        },
+      });
+
+      manualInput.addEventListener("change", (e) => {
+        if (e.target.files.length) {
+          uploader.addFiles(e.target.files);
+          e.target.value = "";
+        }
+      });
+
+      uploader.on("state-change", (files) => {
+        renderFileList(manualFileList, files, uploader);
+        const hasFiles = files.length > 0;
+        const isUploading = files.some((f) => f.status === "uploading");
+        manualUploadBtn.disabled = !hasFiles || isUploading;
+        manualResetBtn.disabled = !hasFiles;
+        manualUploadBtn.textContent = isUploading ? "Uploading..." : "Upload";
+      });
+
+      uploader.on("complete", (results) => {
+        console.log("Manual uploaded:", results.map((r) => r.url));
+      });
+
+      manualUploadBtn.addEventListener("click", () => uploader.upload());
+      manualResetBtn.addEventListener("click", () => uploader.reset());
+
+      // ---------- Shared renderer ----------
+      function renderFileList(container, files, uploaderRef) {
+        container.innerHTML = files
+          .map((f) => {
+            let status = "";
+            if (f.status === "uploading") {
+              status =
+                '<div class="progress">' +
+                '<div class="progress-bar" style="width: ' + f.progress + '%"></div>' +
+                "</div>";
+            } else if (f.status === "complete") {
+              status = '<span class="file-status complete">✓</span>';
+            } else if (f.status === "error") {
+              status = '<span class="file-status error">' + f.error + "</span>";
+            }
+
+            const remove =
+              f.status === "idle" || f.status === "error"
+                ? '<button class="remove" data-id="' + f.id + '">×</button>'
+                : "";
+
+            return (
+              "<li>" +
+              '<span><span class="file-name">' + f.name + "</span>" +
+              '<span class="file-size">' + BunnyUpload.formatBytes(f.size) + "</span></span>" +
+              status +
+              remove +
+              "</li>"
+            );
+          })
+          .join("");
+
+        container.querySelectorAll(".remove").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            uploaderRef.removeFile(btn.dataset.id);
+          });
+        });
+      }
     </script>
   </body>
 </html>

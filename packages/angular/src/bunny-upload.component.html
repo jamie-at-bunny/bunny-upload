@@ -1,89 +1,38 @@
 <div class="bunny-upload" [class]="className()">
-  <div
-    class="bunny-upload-dropzone"
-    [class.bunny-upload-dropzone--active]="isDragOver"
-    (drop)="onDrop($event)"
-    (dragover)="onDragOver($event)"
-    (dragleave)="isDragOver = false"
+  <button
+    type="button"
+    class="bunny-upload-button"
     (click)="fileInput.click()"
-    (keydown.enter)="fileInput.click()"
-    (keydown.space)="fileInput.click()"
-    role="button"
-    tabindex="0"
+    [disabled]="uploadService.isUploading()"
   >
-    <input
-      #fileInput
-      type="file"
-      [multiple]="maxFiles() !== 1"
-      [accept]="acceptString()"
-      (change)="onFileChange($event)"
-      hidden
-    />
-    <div class="bunny-upload-dropzone-text">
-      <p>Drop files here or click to browse</p>
-      @if (maxSize()) {
-        <p class="bunny-upload-hint">Max size: {{ maxSize() }}</p>
+    {{ label() }}
+  </button>
+  <input
+    #fileInput
+    type="file"
+    [multiple]="maxFiles() !== 1"
+    [accept]="acceptString()"
+    (change)="onFileChange($event)"
+    hidden
+  />
+  @if (latestFile(); as file) {
+    <span class="bunny-upload-status">
+      <span class="bunny-upload-filename">{{ file.name }}</span>
+      @if (file.status === "uploading") {
+        <span class="bunny-upload-progress">{{ file.progress | number:'1.0-0' }}%</span>
       }
-    </div>
-  </div>
-
-  @if (uploadService.files().length > 0) {
-    <ul class="bunny-upload-file-list">
-      @for (file of uploadService.files(); track file.id) {
-        <li
-          class="bunny-upload-file"
-          [class]="'bunny-upload-file--' + file.status"
-        >
-          <div class="bunny-upload-file-info">
-            <span class="bunny-upload-file-name">{{ file.name }}</span>
-            <span class="bunny-upload-file-size">{{
-              formatFileSize(file.size)
-            }}</span>
-          </div>
-
-          @if (file.status === "uploading") {
-            <div class="bunny-upload-progress">
-              <div
-                class="bunny-upload-progress-bar"
-                [style.width.%]="file.progress"
-              ></div>
-            </div>
-          }
-
-          @if (file.status === "error") {
-            <div class="bunny-upload-file-error">
-              <span>{{ file.error }}</span>
-              <button class="bunny-upload-retry" (click)="retry()">
-                Retry
-              </button>
-            </div>
-          }
-
-          @if (file.status === "complete") {
-            <span class="bunny-upload-file-complete">Uploaded</span>
-          }
-
-          @if (file.status === "idle" || file.status === "error") {
-            <button
-              class="bunny-upload-remove"
-              (click)="uploadService.removeFile(file.id)"
-              [attr.aria-label]="'Remove ' + file.name"
-            >
-              &times;
-            </button>
-          }
-        </li>
+      @if (file.status === "complete") {
+        <span class="bunny-upload-complete">Uploaded</span>
       }
-    </ul>
+      @if (file.status === "error") {
+        <span class="bunny-upload-error">{{ file.error ?? "Failed" }}</span>
+      }
+      @if (file.status === "idle") {
+        <span class="bunny-upload-size">{{ formatFileSize(file.size) }}</span>
+      }
+    </span>
   }
-
-  @if (!autoUpload() && hasIdleFiles()) {
-    <button
-      class="bunny-upload-button"
-      (click)="retry()"
-      [disabled]="uploadService.isUploading()"
-    >
-      {{ uploadService.isUploading() ? "Uploading..." : "Upload" }}
-    </button>
+  @if (uploadService.files().length > 1) {
+    <span class="bunny-upload-count">+{{ uploadService.files().length - 1 }} more</span>
   }
 </div>
