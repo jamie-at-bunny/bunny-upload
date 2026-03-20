@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "@bunny.net/upload-core": "workspace:*",
-    "@bunny.net/upload-handler": "workspace:*"
+    "@bunny.net/upload-handler": "workspace:*",
+    "@bunny.net/file-manager-handler": "workspace:*",
+    "@bunny.net/file-manager-core": "workspace:*"
   }
 }

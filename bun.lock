@@ -43,6 +43,8 @@
       "name": "example-nextjs",
       "version": "0.0.0",
       "dependencies": {
+        "@bunny.net/file-manager-core": "workspace:*",
+        "@bunny.net/file-manager-handler": "workspace:*",
         "@bunny.net/upload-core": "workspace:*",
         "@bunny.net/upload-handler": "workspace:*",
         "@bunny.net/upload-next": "workspace:*",
@@ -141,6 +143,8 @@
       "name": "example-vanilla",
       "version": "0.0.0",
       "dependencies": {
+        "@bunny.net/file-manager-core": "workspace:*",
+        "@bunny.net/file-manager-handler": "workspace:*",
         "@bunny.net/upload-core": "workspace:*",
         "@bunny.net/upload-handler": "workspace:*",
       },
@@ -189,6 +193,26 @@
         "tsup": "^8.0.0",
         "typescript": "^5.5.0",
         "vitest": "^2.0.0",
+      },
+    },
+    "packages/file-manager-core": {
+      "name": "@bunny.net/file-manager-core",
+      "version": "0.0.0",
+      "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.5.0",
+      },
+    },
+    "packages/file-manager-handler": {
+      "name": "@bunny.net/file-manager-handler",
+      "version": "0.0.0",
+      "dependencies": {
+        "@bunny.net/storage-sdk": "^0.3.1",
+      },
+      "devDependencies": {
+        "@types/node": "^22.0.0",
+        "tsup": "^8.0.0",
+        "typescript": "^5.5.0",
       },
     },
     "packages/handler": {
@@ -393,6 +417,10 @@
     "@babel/types": ["@babel/types@7.29.0", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A=="],
 
     "@bomb.sh/tab": ["@bomb.sh/tab@0.0.14", "", { "peerDependencies": { "cac": "^6.7.14", "citty": "^0.1.6 || ^0.2.0", "commander": "^13.1.0" }, "optionalPeers": ["cac", "citty", "commander"], "bin": { "tab": "dist/bin/cli.mjs" } }, "sha512-cHMk2LI430MVoX1unTt9oK1iZzQS4CYDz97MSxKLNErW69T43Z2QLFTpdS/3jVOIKrIADWfuxQ+nQNJkNV7E4w=="],
+
+    "@bunny.net/file-manager-core": ["@bunny.net/file-manager-core@workspace:packages/file-manager-core"],
+
+    "@bunny.net/file-manager-handler": ["@bunny.net/file-manager-handler@workspace:packages/file-manager-handler"],
 
     "@bunny.net/storage-sdk": ["@bunny.net/storage-sdk@0.3.1", "", { "dependencies": { "dotenv": "^16.4.7", "zod": "^3.24.2" } }, "sha512-nHD+e+CxYBcSoZERkxI/7Qir/kZaCfBTT+ULgZNUitNSyZ4mWD3DbTy+sHwVfRyc6wQ0XYD//6LImi2PU9JoWg=="],
 

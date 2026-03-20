@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bunny File Manager — Vanilla JS</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+      h1 { margin-bottom: 8px; }
+      p.desc { color: #666; margin-bottom: 24px; }
+
+      .breadcrumbs {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+      .breadcrumbs a { color: #0066cc; text-decoration: none; }
+      .breadcrumbs a:hover { text-decoration: underline; }
+      .breadcrumbs .sep { color: #999; }
+      .breadcrumbs .current { color: #333; font-weight: 600; }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .toolbar-spacer { margin-left: auto; }
+
+      .btn {
+        padding: 6px 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .btn:hover { background: #f5f5f5; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn.danger { color: #c00; border-color: #c00; }
+      .btn.danger:hover { background: #fff0f0; }
+
+      .selection-count {
+        font-size: 13px;
+        color: #666;
+      }
+
+      .file-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .file-table th {
+        text-align: left;
+        padding: 8px 12px;
+        border-bottom: 2px solid #eee;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #888;
+        font-weight: 600;
+      }
+      .file-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+      }
+      .file-table tr:hover { background: #fafafa; }
+      .file-table tr.selected { background: #f0f6ff; }
+
+      .file-table .name-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .file-table .name-cell input[type="checkbox"] {
+        flex-shrink: 0;
+      }
+      .file-table .icon {
+        font-size: 18px;
+        flex-shrink: 0;
+        width: 24px;
+        text-align: center;
+      }
+      .file-table .name-link {
+        color: #0066cc;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .file-table .name-link:hover {
+        text-decoration: underline;
+      }
+      .file-table .name-text {
+        color: #333;
+      }
+
+      .size-cell { color: #888; font-size: 13px; }
+      .date-cell { color: #888; font-size: 13px; }
+      .actions-cell { white-space: nowrap; }
+      .actions-cell button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        color: #0066cc;
+        padding: 2px 6px;
+      }
+      .actions-cell button:hover { text-decoration: underline; }
+      .actions-cell button.delete { color: #c00; }
+
+      .status {
+        text-align: center;
+        padding: 40px;
+        color: #888;
+      }
+      .status.error { color: #c00; }
+
+      .empty {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+      }
+
+      .dialog-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+      }
+      .dialog-overlay.open { display: flex; }
+      .dialog {
+        background: #fff;
+        border-radius: 8px;
+        padding: 24px;
+        min-width: 320px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      }
+      .dialog h3 { margin-bottom: 16px; }
+      .dialog input[type="text"] {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+      .dialog .btn-row { display: flex; gap: 8px; justify-content: flex-end; }
+
+      .back-link { display: inline-block; margin-bottom: 16px; color: #0066cc; text-decoration: none; font-size: 14px; }
+      .back-link:hover { text-decoration: underline; }
+
+      .upload-file-list { list-style: none; margin-bottom: 16px; }
+      .upload-file-list:empty { display: none; }
+      .upload-file-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 13px;
+      }
+      .upload-file-list .file-name { font-weight: 500; }
+      .upload-file-list .file-size { color: #888; margin-left: 8px; }
+      .upload-file-list .uploading { color: #f60; }
+      .upload-file-list .complete { color: #0a0; }
+      .upload-file-list .error { color: #c00; }
+      .upload-progress {
+        width: 80px; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;
+      }
+      .upload-progress-bar { height: 100%; background: #f60; transition: width 0.2s; }
+    </style>
+  </head>
+  <body>
+    <a href="/" class="back-link">&larr; Back to uploads</a>
+    <h1>Bunny File Manager</h1>
+    <p class="desc">Browse, create folders, and manage files in your Bunny Storage zone.</p>
+
+    <div class="breadcrumbs" id="breadcrumbs"></div>
+
+    <div class="toolbar">
+      <label class="btn" id="btn-upload-files">
+        Upload Files
+        <input type="file" multiple id="upload-file-input" style="display:none" />
+      </label>
+      <button class="btn" id="btn-import-url">Import URL</button>
+      <button class="btn" id="btn-new-folder">New Folder</button>
+      <button class="btn" id="btn-refresh">Refresh</button>
+      <span class="toolbar-spacer"></span>
+      <span class="selection-count" id="selection-count"></span>
+      <button class="btn danger" id="btn-delete-selected" style="display: none;">Delete Selected</button>
+    </div>
+
+    <ul class="upload-file-list" id="upload-files"></ul>
+
+    <div id="content">
+      <div class="status">Loading...</div>
+    </div>
+
+    <div class="dialog-overlay" id="folder-dialog">
+      <div class="dialog">
+        <h3>New Folder</h3>
+        <input type="text" id="folder-name" placeholder="Folder name" />
+        <div class="btn-row">
+          <button class="btn" id="folder-cancel">Cancel</button>
+          <button class="btn" id="folder-create">Create</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-overlay" id="import-dialog">
+      <div class="dialog">
+        <h3>Import from URL</h3>
+        <input type="text" id="import-url" placeholder="https://example.com/file.jpg" />
+        <input type="text" id="import-filename" placeholder="Filename (optional, auto-detected from URL)" />
+        <div class="btn-row">
+          <button class="btn" id="import-cancel">Cancel</button>
+          <button class="btn" id="import-submit">Import</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/bunny-upload.js"></script>
+    <script type="module">
+      import { createFileManager } from "/bunny-file-manager.js";
+
+      const fm = createFileManager();
+
+      const contentEl = document.getElementById("content");
+      const breadcrumbsEl = document.getElementById("breadcrumbs");
+      const deleteBtn = document.getElementById("btn-delete-selected");
+      const selectionCount = document.getElementById("selection-count");
+
+      // ── Upload ──────────────────────────────────────────────
+
+      const uploadFileList = document.getElementById("upload-files");
+      const fileInput = document.getElementById("upload-file-input");
+      let uploader = null;
+
+      function getUploader() {
+        const state = fm.getState();
+        const endpoint = `/.bunny/upload?folder=${encodeURIComponent(state.currentPath)}`;
+
+        // Recreate uploader with current folder endpoint
+        uploader = BunnyUpload.createUploader({ endpoint });
+
+        uploader.on("state-change", (files) => {
+          uploadFileList.innerHTML = files.map((f) => {
+            let status = "";
+            if (f.status === "uploading") {
+              status =
+                '<div class="upload-progress">' +
+                '<div class="upload-progress-bar" style="width: ' + f.progress + '%"></div>' +
+                "</div>";
+            } else if (f.status === "complete") {
+              status = '<span class="complete">\u2713</span>';
+            } else if (f.status === "error") {
+              status = '<span class="error">' + f.error + "</span>";
+            }
+            return (
+              "<li>" +
+              '<span><span class="file-name">' + f.name + "</span>" +
+              '<span class="file-size">' + formatBytes(f.size) + "</span></span>" +
+              status +
+              "</li>"
+            );
+          }).join("");
+        });
+
+        uploader.on("complete", () => {
+          setTimeout(() => {
+            fm.refresh();
+            setTimeout(() => {
+              uploader.reset();
+            }, 2000);
+          }, 500);
+        });
+
+        return uploader;
+      }
+
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files.length) {
+          const u = getUploader();
+          u.addFiles(fileInput.files);
+          u.upload();
+          fileInput.value = "";
+        }
+      });
+
+      // ── Render ──────────────────────────────────────────────
+
+      function render() {
+        const state = fm.getState();
+
+        // Breadcrumbs
+        const crumbs = fm.getBreadcrumbs();
+        breadcrumbsEl.innerHTML = crumbs
+          .map((c, i) => {
+            if (i === crumbs.length - 1) {
+              return `<span class="current">${c.label}</span>`;
+            }
+            return `<a href="#" data-path="${c.path}">${c.label}</a><span class="sep">/</span>`;
+          })
+          .join("");
+
+        breadcrumbsEl.querySelectorAll("a").forEach((a) => {
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            fm.navigate(a.dataset.path);
+          });
+        });
+
+        // Status states
+        if (state.status === "loading") {
+          contentEl.innerHTML = '<div class="status">Loading...</div>';
+          return;
+        }
+
+        if (state.status === "error") {
+          contentEl.innerHTML = `<div class="status error">Error: ${state.error}</div>`;
+          return;
+        }
+
+        if (state.entries.length === 0) {
+          contentEl.innerHTML = '<div class="empty">This folder is empty</div>';
+          updateSelection(state);
+          return;
+        }
+
+        // Sort: folders first, then files
+        const sorted = [...state.entries].sort((a, b) => {
+          if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
+          return a.objectName.localeCompare(b.objectName);
+        });
+
+        contentEl.innerHTML = `
+          <table class="file-table">
+            <thead>
+              <tr>
+                <th style="width: 40px"><input type="checkbox" id="select-all" /></th>
+                <th>Name</th>
+                <th style="width: 100px">Size</th>
+                <th style="width: 160px">Modified</th>
+                <th style="width: 120px">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sorted.map((entry) => {
+                const selected = state.selected.has(entry.guid);
+                const icon = entry.isDirectory ? "\uD83D\uDCC1" : "\uD83D\uDCC4";
+                const size = entry.isDirectory ? "\u2014" : formatBytes(entry.length);
+                const date = new Date(entry.lastChanged).toLocaleDateString(undefined, {
+                  month: "short", day: "numeric", year: "numeric",
+                  hour: "2-digit", minute: "2-digit"
+                });
+                const fullPath = entry.path + entry.objectName;
+
+                return `
+                  <tr class="${selected ? "selected" : ""}" data-guid="${entry.guid}">
+                    <td><input type="checkbox" ${selected ? "checked" : ""} data-guid="${entry.guid}" /></td>
+                    <td>
+                      <div class="name-cell">
+                        <span class="icon">${icon}</span>
+                        ${entry.isDirectory
+                          ? `<a class="name-link" href="#" data-nav="${fullPath}">${entry.objectName}</a>`
+                          : `<span class="name-text">${entry.objectName}</span>`}
+                      </div>
+                    </td>
+                    <td class="size-cell">${size}</td>
+                    <td class="date-cell">${date}</td>
+                    <td class="actions-cell">
+                      ${!entry.isDirectory ? `<button data-download="${fullPath}">Download</button>` : ""}
+                      ${!entry.isDirectory ? `<button data-copy-url="${fullPath}">Copy URL</button>` : ""}
+                      <button class="delete" data-delete="${entry.isDirectory ? fullPath + "/" : fullPath}">Delete</button>
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        `;
+
+        // Bind events
+        document.getElementById("select-all").addEventListener("change", (e) => {
+          if (e.target.checked) fm.selectAll();
+          else fm.deselectAll();
+        });
+
+        contentEl.querySelectorAll("input[type=checkbox][data-guid]").forEach((cb) => {
+          cb.addEventListener("change", () => fm.toggleSelect(cb.dataset.guid));
+        });
+
+        contentEl.querySelectorAll("[data-nav]").forEach((a) => {
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            fm.navigate(a.dataset.nav);
+          });
+        });
+
+        contentEl.querySelectorAll("[data-download]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            window.open(fm.downloadUrl(btn.dataset.download), "_blank");
+          });
+        });
+
+        contentEl.querySelectorAll("[data-copy-url]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const url = fm.cdnUrl(btn.dataset.copyUrl);
+            await navigator.clipboard.writeText(url);
+            const orig = btn.textContent;
+            btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = orig), 1500);
+          });
+        });
+
+        contentEl.querySelectorAll("[data-delete]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            if (confirm(`Delete "${btn.dataset.delete}"?`)) {
+              try {
+                await fm.deleteEntry(btn.dataset.delete);
+              } catch (err) {
+                alert("Delete failed: " + err.message);
+              }
+            }
+          });
+        });
+
+        updateSelection(state);
+      }
+
+      function updateSelection(state) {
+        const count = state.selected.size;
+        if (count > 0) {
+          deleteBtn.style.display = "";
+          selectionCount.textContent = `${count} selected`;
+        } else {
+          deleteBtn.style.display = "none";
+          selectionCount.textContent = "";
+        }
+      }
+
+      function formatBytes(bytes) {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+      }
+
+      // ── Events ──────────────────────────────────────────────
+
+      fm.on("state-change", render);
+
+      document.getElementById("btn-refresh").addEventListener("click", () => fm.refresh());
+
+      deleteBtn.addEventListener("click", async () => {
+        const selected = fm.getSelected();
+        if (confirm(`Delete ${selected.length} item(s)?`)) {
+          try {
+            await fm.deleteSelected();
+          } catch (err) {
+            alert("Delete failed: " + err.message);
+          }
+        }
+      });
+
+      // New folder dialog
+      const folderDialog = document.getElementById("folder-dialog");
+      const folderInput = document.getElementById("folder-name");
+
+      document.getElementById("btn-new-folder").addEventListener("click", () => {
+        folderInput.value = "";
+        folderDialog.classList.add("open");
+        folderInput.focus();
+      });
+
+      document.getElementById("folder-cancel").addEventListener("click", () => {
+        folderDialog.classList.remove("open");
+      });
+
+      document.getElementById("folder-create").addEventListener("click", async () => {
+        const name = folderInput.value.trim();
+        if (!name) return;
+        folderDialog.classList.remove("open");
+        try {
+          await fm.createFolder(name);
+        } catch (err) {
+          alert("Create folder failed: " + err.message);
+        }
+      });
+
+      folderInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.getElementById("folder-create").click();
+        if (e.key === "Escape") folderDialog.classList.remove("open");
+      });
+
+      // Import URL dialog
+      const importDialog = document.getElementById("import-dialog");
+      const importUrlInput = document.getElementById("import-url");
+      const importFilenameInput = document.getElementById("import-filename");
+
+      document.getElementById("btn-import-url").addEventListener("click", () => {
+        importUrlInput.value = "";
+        importFilenameInput.value = "";
+        importDialog.classList.add("open");
+        importUrlInput.focus();
+      });
+
+      document.getElementById("import-cancel").addEventListener("click", () => {
+        importDialog.classList.remove("open");
+      });
+
+      document.getElementById("import-submit").addEventListener("click", async () => {
+        const url = importUrlInput.value.trim();
+        if (!url) return;
+        const filename = importFilenameInput.value.trim() || undefined;
+        importDialog.classList.remove("open");
+        try {
+          await fm.importFromUrl(url, filename);
+        } catch (err) {
+          alert("Import failed: " + err.message);
+        }
+      });
+
+      importUrlInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.getElementById("import-submit").click();
+        if (e.key === "Escape") importDialog.classList.remove("open");
+      });
+
+      importFilenameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.getElementById("import-submit").click();
+        if (e.key === "Escape") importDialog.classList.remove("open");
+      });
+
+      // ── Init ────────────────────────────────────────────────
+
+      fm.navigate("/");
+    </script>
+  </body>
+</html>

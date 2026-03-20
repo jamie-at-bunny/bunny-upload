@@ -12,6 +12,8 @@
     "@bunny.net/upload-handler": "workspace:*",
     "@bunny.net/upload-next": "workspace:*",
     "@bunny.net/upload-react": "workspace:*",
+    "@bunny.net/file-manager-handler": "workspace:*",
+    "@bunny.net/file-manager-core": "workspace:*",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
