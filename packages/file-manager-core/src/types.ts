@@ -1,3 +1,12 @@
+/**
+ * A JSON-serializable subset of `@bunny.net/storage-sdk`'s `file.StorageFile`.
+ *
+ * The server handler converts SDK responses into this shape before sending
+ * them to the client. Dates are ISO 8601 strings (not Date objects) and
+ * server-only fields (`userId`, `storageZoneId`, `data()`, etc.) are omitted.
+ *
+ * @see {@link https://www.npmjs.com/package/@bunny.net/storage-sdk | @bunny.net/storage-sdk} for the full server-side type.
+ */
 export interface StorageEntry {
   guid: string;
   objectName: string;
@@ -5,7 +14,9 @@ export interface StorageEntry {
   isDirectory: boolean;
   length: number;
   contentType: string;
+  /** ISO 8601 date string (serialized from SDK's `Date`) */
   lastChanged: string;
+  /** ISO 8601 date string (serialized from SDK's `Date`) */
   dateCreated: string;
   checksum: string | null;
 }

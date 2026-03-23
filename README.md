@@ -341,6 +341,131 @@ const { files, addFiles, upload, reset, isUploading } = useBunnyUpload({
 });
 ```
 
+## File Manager
+
+Browse, select, and manage files already in your Bunny Storage zone. Like uploads, it needs a **server handler** and a **client component**.
+
+### Server setup
+
+```ts
+// app/.bunny/files/route.ts (Next.js)
+import { serveBunnyFileManager } from "@bunny.net/upload-next";
+import { createFileManagerHandler } from "@bunny.net/file-manager-handler";
+
+export const { GET, POST, DELETE } = serveBunnyFileManager(
+  createFileManagerHandler()
+);
+```
+
+### Widget
+
+A ready-to-use dialog with grid view, breadcrumbs, and file selection. Users pick files and you get the CDN URLs back.
+
+```tsx
+import { FileManagerWidget } from "@bunny.net/upload-react";
+
+<FileManagerWidget
+  accept={["jpg", "png", "webp"]}
+  onSelect={(entries, urls) => console.log("Selected:", urls)}
+  trigger={({ open }) => <button onClick={open}>Pick image</button>}
+/>
+```
+
+With `allowMultiple={false}`, clicking a file immediately fires `onSelect` and closes the dialog — no confirm step:
+
+```tsx
+<FileManagerWidget
+  allowMultiple={false}
+  onSelect={(entries, urls) => setImage(urls[0])}
+/>
+```
+
+Use the `value` prop to pre-select files when the dialog opens (e.g. to restore a previous selection):
+
+```tsx
+const [selected, setSelected] = useState<string[]>([]);
+
+<FileManagerWidget
+  value={selected}
+  onSelect={(entries, urls) => {
+    setSelected(entries.map(e => e.path + e.objectName));
+  }}
+/>
+```
+
+You can provide custom actions in the footer when files are selected, and per-entry actions on each item in the grid:
+
+```tsx
+import { copyUrlAction, downloadAction } from "@bunny.net/file-manager-core/actions";
+
+// Footer actions (collective) — shown when files are selected
+<FileManagerWidget
+  renderActions={({ selected, urls, actions, executeAction }) => (
+    <>
+      <button onClick={() => navigator.clipboard.writeText(urls[0])}>Copy URL</button>
+      <button onClick={() => insertImage(urls[0])}>Insert</button>
+    </>
+  )}
+/>
+
+// Per-entry actions — rendered on each item in the grid/list
+<FileManagerWidget
+  actions={[copyUrlAction, downloadAction]}
+  renderEntryActions={({ entry, url, actions, executeAction }) => (
+    <>
+      {actions.map(a => (
+        <button key={a.id} onClick={() => executeAction(a.id)}>{a.label}</button>
+      ))}
+    </>
+  )}
+/>
+```
+
+### Render props
+
+Full control over the UI — the component provides all state and methods.
+
+```tsx
+import { FileManager } from "@bunny.net/upload-react";
+
+<FileManager>
+  {({ entries, selected, selectedUrls, navigate, toggleSelect, breadcrumbs }) => (
+    <div>
+      {entries.map(entry => (
+        <div key={entry.guid} onClick={() =>
+          entry.isDirectory
+            ? navigate(entry.path + entry.objectName + "/")
+            : toggleSelect(entry.guid)
+        }>
+          {entry.objectName}
+        </div>
+      ))}
+      {selected.length > 0 && (
+        <button onClick={() => onInsert(selectedUrls)}>
+          Use {selected.length} file(s)
+        </button>
+      )}
+    </div>
+  )}
+</FileManager>
+```
+
+### Headless hook
+
+Maximum flexibility — just state and methods, zero UI.
+
+```tsx
+import { useFileManager } from "@bunny.net/upload-react";
+
+const {
+  entries, currentPath, selected, breadcrumbs,
+  navigate, goUp, toggleSelect, deselectAll,
+  cdnUrl, deleteEntry, createFolder, refresh,
+} = useFileManager();
+```
+
+See the [React package docs](./packages/react) for full API reference and the [Next.js example](./examples/nextjs) for a working demo of all three approaches.
+
 ## Packages
 
 | Package | Description |
@@ -348,7 +473,9 @@ const { files, addFiles, upload, reset, isUploading } = useBunnyUpload({
 | [`@bunny.net/upload`](./packages/upload) | Meta-package — re-exports both client engine and server handler |
 | [`@bunny.net/upload-core`](./packages/core) | Framework-agnostic upload engine and `createDropzone` |
 | [`@bunny.net/upload-handler`](./packages/handler) | Server-side proxy to Bunny Storage |
-| [`@bunny.net/upload-react`](./packages/react) | React hooks, component, and `UploadDropzone` |
+| [`@bunny.net/file-manager-core`](./packages/file-manager-core) | Framework-agnostic file manager engine |
+| [`@bunny.net/file-manager-handler`](./packages/file-manager-handler) | Server-side handler for browsing, deleting, and importing files |
+| [`@bunny.net/upload-react`](./packages/react) | React hooks, components, file manager, and `UploadDropzone` |
 | [`@bunny.net/upload-vue`](./packages/vue) | Vue composable, component, and `UploadDropzone` |
 | [`@bunny.net/upload-next`](./packages/next) | Next.js App Router adapter |
 | [`@bunny.net/upload-nuxt`](./packages/nuxt) | Nuxt server route adapter |

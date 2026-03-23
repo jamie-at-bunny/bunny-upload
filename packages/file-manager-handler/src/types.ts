@@ -1,16 +1,6 @@
 import type { regions } from "@bunny.net/storage-sdk";
 
-export interface StorageEntry {
-  guid: string;
-  objectName: string;
-  path: string;
-  isDirectory: boolean;
-  length: number;
-  contentType: string;
-  lastChanged: string;
-  dateCreated: string;
-  checksum: string | null;
-}
+export type { StorageEntry } from "@bunny.net/file-manager-core";
 
 export interface FileManagerHandlerOptions {
   storageZone?: string;
