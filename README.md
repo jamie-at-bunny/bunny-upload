@@ -484,15 +484,16 @@ See the [React package docs](./packages/react) for full API reference and the [N
 
 ## How it works
 
-```
-Browser                        Your Server                   Bunny Storage
-┌────────────────┐  POST /.bunny/upload  ┌───────────────┐  SDK upload  ┌──────────────┐
-│ @bunny.net/    │ ────────────────────> │ @bunny.net/   │ ──────────> │              │
-│ upload-react   │ <──────────────────── │ upload-handler │ <────────── │  Bunny CDN   │
-│ upload-vue     │  { url, name, size }  │ upload-next   │  ✓ stored   │              │
-│ upload-solid   │                       │ upload-nuxt   │             │              │
-│ upload-angular │                       │               │             │              │
-└────────────────┘                       └───────────────┘             └──────────────┘
+```mermaid
+sequenceDiagram
+    participant Browser as Browser<br>@bunny.net/upload-react<br>upload-vue / upload-solid<br>upload-angular
+    participant Server as Your Server<br>@bunny.net/upload-handler<br>upload-next / upload-nuxt
+    participant Bunny as Bunny Storage<br>Bunny CDN
+
+    Browser->>Server: POST /.bunny/upload
+    Server->>Bunny: SDK upload
+    Bunny-->>Server: ✓ stored
+    Server-->>Browser: { url, name, size }
 ```
 
 The client sends files to your own server (same-origin, so cookies are included automatically). The handler validates the request, streams files to Bunny Storage using `@bunny.net/storage-sdk`, and returns the CDN URLs.
