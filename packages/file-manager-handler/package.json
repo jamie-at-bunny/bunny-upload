@@ -1,5 +1,5 @@
 {
-  "name": "@bunny.net/upload-react",
+  "name": "@bunny.net/file-manager-handler",
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -21,25 +21,16 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@bunny.net/upload-core": "workspace:*",
-    "@bunny.net/file-manager-core": "workspace:*"
-  },
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "@bunny.net/file-manager-core": "workspace:*",
+    "@bunny.net/storage-sdk": "^0.3.1"
   },
   "devDependencies": {
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "@types/node": "^22.0.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.5.0",
-    "vitest": "^2.0.0"
+    "typescript": "^5.5.0"
   }
 }

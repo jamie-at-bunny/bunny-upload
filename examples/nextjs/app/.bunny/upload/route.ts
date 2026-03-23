@@ -8,7 +8,11 @@ export const { POST } = serveBunnyUpload(
       allowedTypes: ["image/*"],
       maxFiles: 5,
     },
-    getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
+    getPath: (file, req) => {
+      const url = new URL(req.url);
+      const folder = url.searchParams.get("folder") || "/uploads";
+      return `${folder.replace(/\/$/, "")}/${file.name}`;
+    },
     // Uncomment to require auth:
     // onBeforeUpload: (_file, req) => {
     //   const cookie = req.headers.get("cookie");

@@ -9,3 +9,12 @@ export function serveBunnyUpload(handler: Handler) {
     },
   };
 }
+
+export function serveBunnyFileManager(handler: Handler) {
+  return {
+    GET: async (request: Request) => handler(request),
+    POST: async (request: Request) => handler(request),
+    PUT: async (request: Request) => handler(request),
+    DELETE: async (request: Request) => handler(request),
+  };
+}
