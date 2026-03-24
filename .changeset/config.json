@@ -23,5 +23,19 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "example-angular",
+    "example-hono",
+    "example-nextjs",
+    "example-nuxt",
+    "example-react-file-manager-hook",
+    "example-react-file-manager-render-props",
+    "example-react-file-manager-widget",
+    "example-react-router",
+    "example-server",
+    "example-solidstart",
+    "example-tanstack-start",
+    "example-vanilla",
+    "example-vue"
+  ]
 }
