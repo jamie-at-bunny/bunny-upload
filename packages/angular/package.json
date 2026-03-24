@@ -1,5 +1,6 @@
 {
   "name": "@bunny.net/upload-angular",
+  "publishConfig": { "access": "public" },
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/fesm2022/bunny.net-upload-angular.mjs",
