@@ -36,6 +36,7 @@ export class UploadDropzoneDirective implements OnInit, OnDestroy {
   readonly accept = input<string[]>();
   readonly maxSize = input<string | number>();
   readonly maxFiles = input<number>();
+  readonly presigned = input<boolean>();
   readonly autoUpload = input(true);
 
   readonly completed = output<UploadResult[]>();
@@ -54,6 +55,7 @@ export class UploadDropzoneDirective implements OnInit, OnDestroy {
         maxFileSize: this.maxSize(),
         maxFiles: this.maxFiles(),
       },
+      presigned: this.presigned(),
       autoUpload: this.autoUpload(),
       onDragOver: (over) => {
         this.isDragOver = over;

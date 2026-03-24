@@ -8,6 +8,7 @@ export interface BunnyUploadProps {
   accept?: string[];
   maxSize?: string | number;
   maxFiles?: number;
+  presigned?: boolean;
   onComplete?: (files: UploadResult[]) => void;
   onError?: (error: Error, file?: FileState) => void;
   className?: string;
@@ -21,6 +22,7 @@ export function BunnyUpload({
   accept,
   maxSize,
   maxFiles,
+  presigned,
   onComplete,
   onError,
   className,
@@ -32,6 +34,7 @@ export function BunnyUpload({
     accept,
     maxSize,
     maxFiles,
+    presigned,
     onComplete,
     onError,
   });

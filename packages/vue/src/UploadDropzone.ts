@@ -12,6 +12,7 @@ export const UploadDropzone = defineComponent({
       default: undefined,
     },
     maxFiles: { type: Number, default: undefined },
+    presigned: { type: Boolean, default: undefined },
     autoUpload: { type: Boolean, default: true },
   },
   emits: {
@@ -28,6 +29,7 @@ export const UploadDropzone = defineComponent({
         accept: props.accept,
         maxSize: props.maxSize,
         maxFiles: props.maxFiles,
+        presigned: props.presigned,
         onComplete: (results) => emit("complete", results),
         onError: (error) => emit("error", error),
       });

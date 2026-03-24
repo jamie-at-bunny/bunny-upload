@@ -7,4 +7,8 @@ export type {
   HandlerResponse,
   FileInfo,
   UploadResult,
+  PresignRequest,
+  PresignResult,
+  PresignResponse,
+  CompleteRequest,
 } from "./types";

@@ -31,9 +31,21 @@ export interface Restrictions {
 
 export const DEFAULT_ENDPOINT = "/.bunny/upload";
 
+export interface PresignResult {
+  name: string;
+  path: string;
+  url: string;
+  presignedUrl: string;
+}
+
+export interface PresignResponse {
+  files: PresignResult[];
+}
+
 export interface UploaderOptions {
   endpoint?: string;
   restrictions?: Restrictions;
+  presigned?: boolean;
 }
 
 export type UploaderEvent =

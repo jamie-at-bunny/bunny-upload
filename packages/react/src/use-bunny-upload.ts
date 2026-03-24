@@ -11,6 +11,7 @@ export interface UseBunnyUploadOptions {
   accept?: string[];
   maxSize?: string | number;
   maxFiles?: number;
+  presigned?: boolean;
   onComplete?: (files: UploadResult[]) => void;
   onError?: (error: Error, file?: FileState) => void;
 }
@@ -27,7 +28,7 @@ export interface UseBunnyUploadReturn {
 export function useBunnyUpload(
   options: UseBunnyUploadOptions
 ): UseBunnyUploadReturn {
-  const { endpoint, accept, maxSize, maxFiles, onComplete, onError } = options;
+  const { endpoint, accept, maxSize, maxFiles, presigned, onComplete, onError } = options;
 
   const restrictions: Restrictions = {
     allowedTypes: accept,
@@ -35,7 +36,7 @@ export function useBunnyUpload(
     maxFiles,
   };
 
-  const uploaderRef = useRef(createUploader({ endpoint, restrictions }));
+  const uploaderRef = useRef(createUploader({ endpoint, restrictions, presigned }));
   const filesRef = useRef<FileState[]>([]);
   const subscribersRef = useRef(new Set<() => void>());
 

@@ -11,6 +11,8 @@ export type {
   FileStatus,
   UploadResult,
   UploadResponse,
+  PresignResult,
+  PresignResponse,
   Restrictions,
   UploaderOptions,
   UploaderEvent,

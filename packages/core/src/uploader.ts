@@ -6,6 +6,7 @@ import {
   type UploadResponse,
   type UploadResult,
   type UploaderOptions,
+  type PresignResponse,
   type EventMap,
 } from "./types";
 import { generateId, matchesMimeType, parseFileSize } from "./utils";
@@ -18,10 +19,12 @@ export class Uploader {
   private emitter = new Emitter();
   private endpoint: string;
   private restrictions: Restrictions;
+  private presigned: boolean;
 
   constructor(options: UploaderOptions = {}) {
     this.endpoint = options.endpoint ?? DEFAULT_ENDPOINT;
     this.restrictions = options.restrictions ?? {};
+    this.presigned = options.presigned ?? false;
   }
 
   on<K extends keyof EventMap>(event: K, fn: EventMap[K]): () => void {
@@ -87,6 +90,14 @@ export class Uploader {
       this.updateFile(file.id, { status: "uploading", progress: 0, error: undefined });
     }
 
+    if (this.presigned) {
+      return this.uploadPresigned(filesToUpload);
+    }
+
+    return this.uploadProxy(filesToUpload);
+  }
+
+  private async uploadProxy(filesToUpload: FileState[]): Promise<UploadResult[]> {
     const results: UploadResult[] = [];
 
     for (const file of filesToUpload) {
@@ -114,6 +125,142 @@ export class Uploader {
     }
 
     return results;
+  }
+
+  private async uploadPresigned(filesToUpload: FileState[]): Promise<UploadResult[]> {
+    // Step 1: Request presigned URLs from the server
+    const presignResponse = await fetch(this.endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        presign: true,
+        files: filesToUpload.map((f) => ({
+          name: f.name,
+          size: f.size,
+          type: f.type,
+        })),
+      }),
+    });
+
+    if (!presignResponse.ok) {
+      const errorData = await presignResponse.json().catch(() => null);
+      const message = errorData?.error ?? `Presign request failed with status ${presignResponse.status}`;
+      for (const file of filesToUpload) {
+        this.updateFile(file.id, { status: "error", error: message });
+        this.emitter.emit("error", new Error(message), this.files.get(file.id));
+      }
+      return [];
+    }
+
+    const { files: presignResults }: PresignResponse = await presignResponse.json();
+
+    // Step 2: Upload each file directly to S3 using the presigned URL
+    const results: UploadResult[] = [];
+    const completed: { name: string; path: string; size: number }[] = [];
+
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const fileState = filesToUpload[i];
+      const presign = presignResults[i];
+
+      try {
+        await this.uploadToPresignedUrlWithRetry(fileState, presign.presignedUrl);
+
+        const result: UploadResult = {
+          name: presign.name,
+          path: presign.path,
+          size: fileState.size,
+          url: presign.url,
+        };
+
+        results.push(result);
+        completed.push({ name: presign.name, path: presign.path, size: fileState.size });
+
+        this.updateFile(fileState.id, {
+          status: "complete",
+          progress: 100,
+          url: presign.url,
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Upload failed";
+        this.updateFile(fileState.id, { status: "error", error: message });
+        this.emitter.emit(
+          "error",
+          err instanceof Error ? err : new Error(message),
+          this.files.get(fileState.id)
+        );
+      }
+    }
+
+    // Step 3: Notify the server that uploads are complete
+    if (completed.length > 0) {
+      await fetch(this.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ complete: true, files: completed }),
+      }).catch(() => {
+        // Completion notification is best-effort — files are already in S3
+      });
+
+      this.emitter.emit("complete", results);
+    }
+
+    return results;
+  }
+
+  private async uploadToPresignedUrlWithRetry(
+    fileState: FileState,
+    presignedUrl: string,
+    retries = DEFAULT_RETRIES
+  ): Promise<void> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        return await this.uploadToPresignedUrl(fileState, presignedUrl);
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error("Upload failed");
+        if (attempt < retries) {
+          const delay = INITIAL_BACKOFF_MS * Math.pow(2, attempt);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+
+    throw lastError;
+  }
+
+  private uploadToPresignedUrl(fileState: FileState, presignedUrl: string): Promise<void> {
+    const xhr = new XMLHttpRequest();
+
+    return new Promise<void>((resolve, reject) => {
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          this.updateFile(fileState.id, { progress });
+          this.emitter.emit("upload-progress", this.files.get(fileState.id)!);
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        reject(new Error("Network error during upload"));
+      });
+
+      xhr.addEventListener("abort", () => {
+        reject(new Error("Upload aborted"));
+      });
+
+      xhr.open("PUT", presignedUrl);
+      xhr.setRequestHeader("Content-Type", fileState.type);
+      xhr.send(fileState.file);
+    });
   }
 
   reset(): void {

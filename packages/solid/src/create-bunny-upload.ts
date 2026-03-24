@@ -12,6 +12,7 @@ export interface CreateBunnyUploadOptions {
   accept?: string[];
   maxSize?: string | number;
   maxFiles?: number;
+  presigned?: boolean;
   onComplete?: (files: UploadResult[]) => void;
   onError?: (error: Error, file?: FileState) => void;
 }
@@ -44,7 +45,7 @@ export function createBunnyUpload(
     };
   }
 
-  const { endpoint, accept, maxSize, maxFiles, onComplete, onError } = options;
+  const { endpoint, accept, maxSize, maxFiles, presigned, onComplete, onError } = options;
 
   const restrictions: Restrictions = {
     allowedTypes: accept,
@@ -52,7 +53,7 @@ export function createBunnyUpload(
     maxFiles,
   };
 
-  const uploader = createUploader({ endpoint, restrictions });
+  const uploader = createUploader({ endpoint, restrictions, presigned });
 
   const unsubState = uploader.on("state-change", (updatedFiles) => {
     setFiles([...updatedFiles]);

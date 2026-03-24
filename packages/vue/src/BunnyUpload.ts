@@ -12,6 +12,7 @@ export const BunnyUpload = defineComponent({
       default: undefined,
     },
     maxFiles: { type: Number, default: undefined },
+    presigned: { type: Boolean, default: undefined },
     autoUpload: { type: Boolean, default: true },
     label: { type: String, default: "Choose file" },
   },
@@ -27,6 +28,7 @@ export const BunnyUpload = defineComponent({
       accept: props.accept,
       maxSize: props.maxSize,
       maxFiles: props.maxFiles,
+      presigned: props.presigned,
       onComplete: (results) => emit("complete", results),
       onError: (error) => emit("error", error),
     });

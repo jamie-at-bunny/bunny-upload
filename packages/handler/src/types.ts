@@ -17,6 +17,27 @@ export interface UploadResult {
   url: string;
 }
 
+export interface PresignRequest {
+  presign: true;
+  files: FileInfo[];
+}
+
+export interface PresignResult {
+  name: string;
+  path: string;
+  url: string;
+  presignedUrl: string;
+}
+
+export interface PresignResponse {
+  files: PresignResult[];
+}
+
+export interface CompleteRequest {
+  complete: true;
+  files: { name: string; path: string; size: number }[];
+}
+
 import type { regions } from "@bunny.net/storage-sdk";
 
 export interface HandlerOptions {

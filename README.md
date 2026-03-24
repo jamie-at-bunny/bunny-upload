@@ -37,12 +37,7 @@ npm install @bunny.net/upload @bunny.net/upload-react @bunny.net/upload-next
 import { serveBunnyUpload } from "@bunny.net/upload-next";
 import { createBunnyUploadHandler } from "@bunny.net/upload";
 
-export const { POST } = serveBunnyUpload(
-  createBunnyUploadHandler({
-    restrictions: { maxFileSize: "10mb", allowedTypes: ["image/*"], maxFiles: 5 },
-    getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-  })
-);
+export const { POST } = serveBunnyUpload(createBunnyUploadHandler());
 ```
 
 **Client** — any client component
@@ -52,7 +47,7 @@ export const { POST } = serveBunnyUpload(
 import { BunnyUpload } from "@bunny.net/upload-react";
 
 export default function Page() {
-  return <BunnyUpload accept={["image/*"]} maxSize="10mb" maxFiles={5} onComplete={(files) => console.log(files)} />;
+  return <BunnyUpload onComplete={(files) => console.log(files)} />;
 }
 ```
 
@@ -73,12 +68,7 @@ npm install @bunny.net/upload @bunny.net/upload-vue @bunny.net/upload-nuxt
 import { defineBunnyUploadHandler } from "@bunny.net/upload-nuxt";
 import { createBunnyUploadHandler } from "@bunny.net/upload";
 
-export default defineBunnyUploadHandler(
-  createBunnyUploadHandler({
-    restrictions: { maxFileSize: "10mb", allowedTypes: ["image/*"], maxFiles: 5 },
-    getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-  })
-);
+export default defineBunnyUploadHandler(createBunnyUploadHandler());
 ```
 
 **Client** — `app.vue` or any component
@@ -89,7 +79,7 @@ import { BunnyUpload } from "@bunny.net/upload-vue";
 </script>
 
 <template>
-  <BunnyUpload :accept="['image/*']" max-size="10mb" :max-files="5" @complete="console.log" />
+  <BunnyUpload @complete="console.log" />
 </template>
 ```
 
@@ -114,7 +104,7 @@ import { BunnyUpload } from "@bunny.net/upload-vue";
 </script>
 
 <template>
-  <BunnyUpload :accept="['image/*']" max-size="10mb" :max-files="5" @complete="console.log" />
+  <BunnyUpload @complete="console.log" />
 </template>
 ```
 
@@ -134,10 +124,7 @@ npm install @bunny.net/upload @bunny.net/upload-react
 ```ts
 import { createBunnyUploadHandler } from "@bunny.net/upload";
 
-const handler = createBunnyUploadHandler({
-  restrictions: { maxFileSize: "10mb", allowedTypes: ["image/*"], maxFiles: 5 },
-  getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-});
+const handler = createBunnyUploadHandler();
 
 export async function action({ request }: { request: Request }) {
   return handler(request);
@@ -150,7 +137,7 @@ export async function action({ request }: { request: Request }) {
 import { BunnyUpload } from "@bunny.net/upload-react";
 
 export default function Home() {
-  return <BunnyUpload accept={["image/*"]} maxSize="10mb" maxFiles={5} onComplete={(files) => console.log(files)} />;
+  return <BunnyUpload onComplete={(files) => console.log(files)} />;
 }
 ```
 
@@ -171,7 +158,7 @@ npm install @bunny.net/upload @bunny.net/upload-react
 import { BunnyUpload } from "@bunny.net/upload-react";
 
 export default function Home() {
-  return <BunnyUpload accept={["image/*"]} maxSize="10mb" maxFiles={5} onComplete={(files) => console.log(files)} />;
+  return <BunnyUpload onComplete={(files) => console.log(files)} />;
 }
 ```
 
@@ -192,10 +179,7 @@ npm install @bunny.net/upload-solid @bunny.net/upload
 import type { APIEvent } from "@solidjs/start/server";
 import { createBunnyUploadHandler } from "@bunny.net/upload";
 
-const handler = createBunnyUploadHandler({
-  restrictions: { maxFileSize: "10mb", allowedTypes: ["image/*"], maxFiles: 5 },
-  getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-});
+const handler = createBunnyUploadHandler();
 
 export async function POST(event: APIEvent) {
   return handler(event.request);
@@ -208,7 +192,7 @@ export async function POST(event: APIEvent) {
 import { BunnyUpload } from "@bunny.net/upload-solid";
 
 export default function Home() {
-  return <BunnyUpload accept={["image/*"]} maxSize="10mb" onComplete={(files) => console.log(files)} />;
+  return <BunnyUpload onComplete={(files) => console.log(files)} />;
 }
 ```
 
@@ -235,7 +219,7 @@ import { BunnyUploadComponent } from "@bunny.net/upload-angular";
   selector: "app-root",
   standalone: true,
   imports: [BunnyUploadComponent],
-  template: `<bunny-upload [accept]="['image/*']" maxSize="10mb" [maxFiles]="5" (completed)="onComplete($event)" />`,
+  template: `<bunny-upload (completed)="onComplete($event)" />`,
 })
 export class AppComponent {
   onComplete(files: any[]) { console.log(files); }
@@ -259,10 +243,7 @@ import { createBunnyUploadHandler } from "@bunny.net/upload";
 
 const app = new Hono();
 
-const handler = createBunnyUploadHandler({
-  restrictions: { maxFileSize: "10mb", allowedTypes: ["image/*"], maxFiles: 5 },
-  getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-});
+const handler = createBunnyUploadHandler();
 
 app.post("/.bunny/upload", (c) => handler(c.req.raw));
 
@@ -287,7 +268,6 @@ No framework needed. Use `createDropzone` to attach drag-and-drop to any element
 <script src="/bunny-upload.js"></script>
 <script>
   const dropzone = BunnyUpload.createDropzone(document.getElementById("dropzone"), {
-    restrictions: { allowedTypes: ["image/*"], maxFileSize: "10mb" },
     onDragOver: (isDragOver) => {
       document.getElementById("dropzone").classList.toggle("active", isDragOver);
     },
@@ -497,6 +477,54 @@ sequenceDiagram
 ```
 
 The client sends files to your own server (same-origin, so cookies are included automatically). The handler validates the request, streams files to Bunny Storage using `@bunny.net/storage-sdk`, and returns the CDN URLs.
+
+### Presigned uploads (S3-compatible zones)
+
+If your storage zone has S3 compatibility enabled, you can upload files directly from the browser to Bunny Storage — bypassing your server entirely for the file transfer. Your server only handles signing and validation.
+
+```mermaid
+sequenceDiagram
+    participant Browser as Browser
+    participant Server as Your Server
+    participant S3 as Bunny S3
+
+    Browser->>Server: POST /.bunny/upload (file metadata)
+    Server->>Server: Validate + generate presigned URL
+    Server-->>Browser: { presignedUrl, url }
+    Browser->>S3: PUT file directly
+    S3-->>Browser: ✓ stored
+    Browser->>Server: POST /.bunny/upload (complete)
+    Server-->>Browser: { url, name, size }
+```
+
+**Server** — no changes needed (the handler auto-detects presign requests):
+
+```ts
+createBunnyUploadHandler({
+  restrictions: { maxFileSize: "10mb", allowedTypes: ["image/*"] },
+  getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
+});
+```
+
+Your existing `BUNNY_STORAGE_ZONE`, `BUNNY_STORAGE_PASSWORD`, and `BUNNY_STORAGE_REGION` env vars are reused as S3 credentials — no extra config.
+
+**Client** — add the `presigned` prop:
+
+```tsx
+<BunnyUpload presigned accept={["image/*"]} maxSize="10mb" />
+```
+
+Or with the headless hook:
+
+```tsx
+const { files, addFiles, upload } = useBunnyUpload({
+  presigned: true,
+  accept: ["image/*"],
+  maxSize: "10mb",
+});
+```
+
+> **Note:** Presigned uploads require an S3-compatible storage zone (Frankfurt `de`, New York `ny`, or Singapore `sg`). S3 compatibility must be enabled during zone creation.
 
 ## Auth
 

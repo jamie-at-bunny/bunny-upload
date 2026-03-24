@@ -24,6 +24,7 @@ export class BunnyUploadComponent implements OnInit {
   readonly accept = input<string[]>();
   readonly maxSize = input<string | number>();
   readonly maxFiles = input<number>();
+  readonly presigned = input<boolean>();
   readonly autoUpload = input(true);
   readonly className = input("");
   readonly label = input("Choose file");
@@ -48,6 +49,7 @@ export class BunnyUploadComponent implements OnInit {
         maxFileSize: this.maxSize(),
         maxFiles: this.maxFiles(),
       },
+      presigned: this.presigned(),
     });
   }
 

@@ -39,6 +39,7 @@ export interface UploadDropzoneProps {
   accept?: string[];
   maxSize?: string | number;
   maxFiles?: number;
+  presigned?: boolean;
   autoUpload?: boolean;
   onComplete?: (files: UploadResult[]) => void;
   onError?: (error: Error, file?: FileState) => void;
@@ -50,6 +51,7 @@ export function UploadDropzone({
   accept,
   maxSize,
   maxFiles,
+  presigned,
   autoUpload = true,
   onComplete,
   onError,
@@ -61,6 +63,7 @@ export function UploadDropzone({
       accept,
       maxSize,
       maxFiles,
+      presigned,
       onComplete,
       onError,
     });

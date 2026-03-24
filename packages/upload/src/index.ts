@@ -10,6 +10,10 @@ export type {
   HandlerRestrictions,
   HandlerResponse,
   FileInfo,
+  PresignRequest,
+  PresignResult as HandlerPresignResult,
+  PresignResponse as HandlerPresignResponse,
+  CompleteRequest,
 } from "@bunny.net/upload-handler";
 
 // Client — upload engine, dropzone, and utilities
@@ -28,6 +32,8 @@ export type {
   FileStatus,
   UploadResult,
   UploadResponse,
+  PresignResult,
+  PresignResponse,
   Restrictions,
   UploaderOptions,
   UploaderEvent,
