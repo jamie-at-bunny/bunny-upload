@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bunny Upload — S3 Presigned URLs</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; }
+      h1 { margin-bottom: 8px; }
+      h2 { margin-top: 32px; margin-bottom: 8px; }
+      p.desc { color: #666; margin-bottom: 16px; }
+
+      .dropzone {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .dropzone:hover,
+      .dropzone.active { border-color: #f60; background: #fff8f0; }
+
+      .file-list { list-style: none; margin-top: 16px; }
+      .file-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+      }
+      .file-name { font-weight: 500; }
+      .file-size { color: #888; font-size: 0.85em; margin-left: 8px; }
+      .file-status { font-size: 0.85em; }
+      .file-status.complete { color: #0a0; }
+      .file-status.error { color: #c00; }
+
+      .progress {
+        width: 100px;
+        height: 6px;
+        background: #eee;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        background: #f60;
+        transition: width 0.2s;
+      }
+
+      .remove {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        color: #999;
+        padding: 0 4px;
+      }
+      .remove:hover { color: #c00; }
+
+      .btn {
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn:hover { background: #f5f5f5; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-row { display: flex; gap: 8px; margin-top: 16px; }
+
+      .info {
+        background: #f0f7ff;
+        border: 1px solid #cce0ff;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 24px;
+        font-size: 0.9em;
+        color: #1a3a5c;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bunny Upload — S3 Presigned URLs</h1>
+
+    <div class="info">
+      This example uses <strong>presigned URLs</strong> to upload files directly
+      from the browser to Bunny Storage via S3-compatible endpoints. Files never
+      pass through your server — only the presign request and completion
+      notification do.
+    </div>
+
+    <section>
+      <h2>Presigned Upload</h2>
+      <p class="desc">Files are uploaded directly to S3 using presigned URLs.</p>
+
+      <div class="dropzone" id="dropzone">
+        Drop files here or click to browse
+      </div>
+      <ul class="file-list" id="file-list"></ul>
+
+      <div class="btn-row">
+        <button class="btn" id="upload-btn" disabled>Upload</button>
+        <button class="btn" id="reset-btn" disabled>Reset</button>
+      </div>
+    </section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

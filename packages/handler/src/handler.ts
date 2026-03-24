@@ -41,18 +41,13 @@ function jsonResponse(data: unknown, status = 200): Response {
 
 const S3_REGIONS: Record<string, string> = {
   de: "de",
-  uk: "uk",
   ny: "ny",
-  la: "la",
   sg: "sg",
-  br: "br",
-  jh: "jh",
-  syd: "syd",
 };
 
 function buildS3Endpoint(region: string): string {
   const s3Region = S3_REGIONS[region];
-  if (!s3Region) throw new Error(`Unknown storage region "${region}" for S3 endpoint`);
+  if (!s3Region) throw new Error(`Storage region "${region}" does not support S3. Supported regions: de, ny, sg`);
   return `https://${s3Region}-s3.storage.bunnycdn.com`;
 }
 
@@ -122,6 +117,7 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
           secretAccessKey: storagePassword!,
         },
         forcePathStyle: true,
+        requestChecksumCalculation: "WHEN_REQUIRED",
       });
     }
     return s3Client;
@@ -170,6 +166,7 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
 
       const presignedUrl = await getSignedUrl(client, command, {
         expiresIn: 3600,
+        signableHeaders: new Set(["content-type"]),
       });
 
       results.push({
