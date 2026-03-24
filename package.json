@@ -3,7 +3,7 @@
   "private": true,
   "workspaces": ["packages/*", "examples/*"],
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo build --filter='./packages/*'",
     "dev": "turbo dev --filter='./packages/*'",
     "test": "turbo test",
     "lint": "turbo lint",
