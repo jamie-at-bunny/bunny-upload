@@ -372,7 +372,7 @@ export function FileManagerWidget({
                           )}
 
                           {/* Selection indicator */}
-                          {!entry.isDirectory && (
+                          {!entry.isDirectory && !instantSelect && (
                             <span
                               className={`bunny-fm__entry-check${
                                 isSelected
@@ -410,7 +410,7 @@ export function FileManagerWidget({
                         </span>
 
                         {/* Per-entry actions */}
-                        {renderEntryActions && (
+                        {renderEntryActions ? (
                           <div
                             className="bunny-fm__entry-actions"
                             onClick={(e) => e.stopPropagation()}
@@ -423,6 +423,13 @@ export function FileManagerWidget({
                                 fm.executeAction(actionId, [entry]),
                             })}
                           </div>
+                        ) : (
+                          <DefaultEntryActions
+                            actions={fm.getActions([entry])}
+                            executeAction={(actionId) =>
+                              fm.executeAction(actionId, [entry])
+                            }
+                          />
                         )}
                       </div>
                     );
@@ -471,5 +478,74 @@ export function FileManagerWidget({
         </dialog>
       )}
     </>
+  );
+}
+
+// ── Default per-entry actions ─────────────────────────────────
+
+function DefaultEntryActions({
+  actions,
+  executeAction,
+}: {
+  actions: FileManagerAction[];
+  executeAction: (actionId: string) => Promise<void>;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClick, true);
+    return () => document.removeEventListener("click", handleClick, true);
+  }, [menuOpen]);
+
+  if (actions.length === 0) return null;
+
+  const [primary, ...rest] = actions;
+
+  return (
+    <div className="bunny-fm__entry-actions" onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        className="bunny-fm__action-btn"
+        onClick={() => executeAction(primary.id)}
+      >
+        {primary.label}
+      </button>
+      {rest.length > 0 && (
+        <div className="bunny-fm__action-menu" ref={menuRef}>
+          <button
+            type="button"
+            className="bunny-fm__action-btn bunny-fm__action-more"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="More actions"
+          >
+            &hellip;
+          </button>
+          {menuOpen && (
+            <div className="bunny-fm__action-dropdown">
+              {rest.map((action) => (
+                <button
+                  key={action.id}
+                  type="button"
+                  className="bunny-fm__action-dropdown-item"
+                  onClick={() => {
+                    executeAction(action.id);
+                    setMenuOpen(false);
+                  }}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

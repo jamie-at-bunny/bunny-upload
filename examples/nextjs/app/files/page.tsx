@@ -97,19 +97,6 @@ function WidgetExample() {
         <FileManagerWidget
           label="Browse files"
           actions={[copyUrlAction, downloadAction]}
-          renderEntryActions={({ actions, executeAction }) => (
-            <>
-              {actions.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => executeAction(a.id)}
-                  style={{ padding: "2px 8px", border: "1px solid #ddd", borderRadius: 3, background: "#fff", cursor: "pointer", fontSize: 11 }}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </>
-          )}
           renderActions={({ selected, urls, actions, executeAction }) => (
             <>
               {actions.map((a) => (

@@ -1,3 +1,5 @@
+import "@bunny.net/upload-core/styles.css";
+
 export const metadata = {
   title: "Bunny Upload — Next.js Example",
 };

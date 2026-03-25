@@ -16,9 +16,10 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    }
+    },
+    "./styles.css": "./styles.css"
   },
-  "files": ["dist"],
+  "files": ["dist", "styles.css"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
