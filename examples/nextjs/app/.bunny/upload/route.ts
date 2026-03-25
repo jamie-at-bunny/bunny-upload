@@ -10,8 +10,8 @@ export const { POST } = serveBunnyUpload(
     },
     getPath: (file, req) => {
       const url = new URL(req.url);
-      const folder = url.searchParams.get("folder") || "/uploads";
-      return `${folder.replace(/\/$/, "")}/${file.name}`;
+      const dir = url.searchParams.get("dir") || "/";
+      return `${dir.replace(/\/$/, "")}/${file.name}`;
     },
     // Uncomment to require auth:
     // onBeforeUpload: (_file, req) => {

@@ -33,6 +33,16 @@ export default function Home() {
         />
       </Section>
 
+      <Section title="Upload Widget + File Manager" description="Upload new files or browse and select existing ones.">
+        <UploadWidget
+          accept={["image/*"]}
+          maxSize="10mb"
+          maxFiles={5}
+          withFileManager
+          onComplete={(files) => console.log("Selected:", files)}
+        />
+      </Section>
+
       <Section title="Custom Dropzone" description="Full control over the UI with render props.">
         <DropzoneExample />
       </Section>

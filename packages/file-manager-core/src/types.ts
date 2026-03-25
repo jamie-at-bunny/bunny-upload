@@ -80,6 +80,8 @@ export type FileManagerEventMap = {
   error: (error: Error) => void;
   "action-start": (actionId: string, entries: StorageEntry[]) => void;
   "action-complete": (actionId: string, entries: StorageEntry[]) => void;
+  "delete-start": (paths: string[]) => void;
+  "delete-complete": (paths: string[]) => void;
   "import-start": (url: string, path: string) => void;
   "import-complete": (url: string, path: string) => void;
 };

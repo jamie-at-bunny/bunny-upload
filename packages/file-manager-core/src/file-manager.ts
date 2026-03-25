@@ -196,27 +196,71 @@ export class FileManager {
   }
 
   async deleteEntry(path: string): Promise<void> {
-    const url = `${this.endpoint}?path=${encodeURIComponent(path)}`;
+    this.emitter.emit("delete-start", [path]);
 
+    // Optimistically remove from state
+    const objectName = path.replace(/\/$/, "").split("/").pop() ?? "";
+    this.setState({
+      entries: this.state.entries.filter(
+        (e) => !(e.objectName === objectName && path.startsWith(e.path))
+      ),
+      selected: new Set(
+        [...this.state.selected].filter((guid) => {
+          const entry = this.state.entries.find((e) => e.guid === guid);
+          if (!entry) return false;
+          const entryPath = entry.isDirectory
+            ? `${entry.path}${entry.objectName}/`
+            : `${entry.path}${entry.objectName}`;
+          return entryPath !== path;
+        })
+      ),
+    });
+
+    const url = `${this.endpoint}?path=${encodeURIComponent(path)}`;
     const res = await fetch(url, { method: "DELETE" });
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({ error: res.statusText }));
+      await this.refresh();
       throw new Error(body.error ?? `Failed to delete (${res.status})`);
     }
 
-    await this.refresh();
+    this.emitter.emit("delete-complete", [path]);
   }
 
   async deleteSelected(): Promise<void> {
     const selected = this.getSelected();
-
-    for (const entry of selected) {
-      const fullPath = entry.isDirectory
+    const paths = selected.map((entry) =>
+      entry.isDirectory
         ? `${entry.path}${entry.objectName}/`
-        : `${entry.path}${entry.objectName}`;
-      await this.deleteEntry(fullPath);
+        : `${entry.path}${entry.objectName}`
+    );
+
+    this.emitter.emit("delete-start", paths);
+
+    // Optimistically clear all selected from state
+    this.setState({
+      entries: this.state.entries.filter(
+        (e) => !selected.some((s) => s.guid === e.guid)
+      ),
+      selected: new Set(),
+    });
+
+    // Fire all deletes in parallel
+    const results = await Promise.allSettled(
+      paths.map((fullPath) => {
+        const url = `${this.endpoint}?path=${encodeURIComponent(fullPath)}`;
+        return fetch(url, { method: "DELETE" });
+      })
+    );
+
+    // If any failed, refresh to reconcile
+    const hasFailure = results.some((r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok));
+    if (hasFailure) {
+      await this.refresh();
     }
+
+    this.emitter.emit("delete-complete", paths);
   }
 
   async importFromUrl(url: string, filename?: string): Promise<void> {

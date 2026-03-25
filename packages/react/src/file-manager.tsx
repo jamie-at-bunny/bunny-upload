@@ -1,6 +1,7 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { StorageEntry, FileManagerAction } from "@bunny.net/file-manager-core";
 import { useFileManager, type UseFileManagerOptions } from "./use-file-manager";
+import { useBunnyUpload } from "./use-bunny-upload";
 import {
   Breadcrumbs,
   ContentStatus,
@@ -127,12 +128,44 @@ export function FileManager({
 
   // ── Built-in UI mode ──────────────────────────────────────
 
-  const uploadEndpoint =
+  const baseUploadEndpoint =
     withUploads === true
       ? DEFAULT_UPLOAD_ENDPOINT
       : typeof withUploads === "string"
         ? withUploads
         : null;
+
+  const uploadEndpoint = baseUploadEndpoint
+    ? `${baseUploadEndpoint}?dir=${encodeURIComponent(fm.currentPath)}`
+    : null;
+
+  const uploader = useBunnyUpload({
+    endpoint: uploadEndpoint ?? undefined,
+    onComplete: () => fm.refresh(),
+  });
+
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const dropzoneHandlers = uploadEndpoint
+    ? {
+        onDrop: (e: React.DragEvent) => {
+          e.preventDefault();
+          setIsDragOver(false);
+          if (e.dataTransfer.files.length > 0) {
+            uploader.addFiles(e.dataTransfer.files);
+            uploader.upload();
+          }
+        },
+        onDragOver: (e: React.DragEvent) => {
+          e.preventDefault();
+          setIsDragOver(true);
+        },
+        onDragLeave: (e: React.DragEvent) => {
+          e.preventDefault();
+          setIsDragOver(false);
+        },
+      }
+    : {};
 
   const visibleEntries = filterAndSortEntries(fm.entries, accept);
   const hasActions = !!(withActions && withActions.length > 0);
@@ -183,7 +216,10 @@ export function FileManager({
       </div>
 
       {/* Content */}
-      <div className="bunny-fm__content">
+      <div
+        className={`bunny-fm__content${isDragOver ? " bunny-fm__content--drag-over" : ""}`}
+        {...dropzoneHandlers}
+      >
         <ContentStatus
           status={fm.status}
           error={fm.error}
@@ -213,29 +249,35 @@ export function FileManager({
                       : undefined
                   }
                   renderActions={
-                    hasActions && !entry.isDirectory ? (
-                      renderEntryActions ? (
-                        <div
-                          className="bunny-fm__entry-actions"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {renderEntryActions({
-                            entry,
-                            url,
-                            actions: fm.getActions([entry]),
-                            executeAction: (actionId) =>
-                              fm.executeAction(actionId, [entry]),
-                          })}
-                        </div>
-                      ) : (
-                        <DefaultEntryActions
-                          actions={fm.getActions([entry])}
-                          executeAction={(actionId) =>
-                            fm.executeAction(actionId, [entry])
+                    renderEntryActions && hasActions && !entry.isDirectory ? (
+                      <div
+                        className="bunny-fm__entry-actions"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {renderEntryActions({
+                          entry,
+                          url,
+                          actions: fm.getActions([entry]),
+                          executeAction: (actionId) =>
+                            fm.executeAction(actionId, [entry]),
+                        })}
+                      </div>
+                    ) : (
+                      <DefaultEntryActions
+                        actions={hasActions && !entry.isDirectory ? fm.getActions([entry]) : []}
+                        executeAction={(actionId) =>
+                          fm.executeAction(actionId, [entry])
+                        }
+                        onDelete={() => {
+                          const path = entry.isDirectory
+                            ? `${entry.path}${entry.objectName}/`
+                            : `${entry.path}${entry.objectName}`;
+                          if (confirm(`Delete "${entry.objectName}"?`)) {
+                            fm.deleteEntry(path);
                           }
-                        />
-                      )
-                    ) : undefined
+                        }}
+                      />
+                    )
                   }
                 />
               );

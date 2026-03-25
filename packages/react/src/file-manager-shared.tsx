@@ -126,6 +126,7 @@ export interface EntryCardProps {
   allowMultiple?: boolean;
   onClick: () => void;
   onSelect?: () => void;
+  onDelete?: () => void;
   renderActions?: React.ReactNode;
 }
 
@@ -137,6 +138,7 @@ export function EntryCard({
   allowMultiple = true,
   onClick,
   onSelect,
+  onDelete,
   renderActions,
 }: EntryCardProps) {
   const isImage = isImageEntry(entry);
@@ -214,9 +216,11 @@ export function EntryCard({
 export function DefaultEntryActions({
   actions,
   executeAction,
+  onDelete,
 }: {
   actions: FileManagerAction[];
   executeAction: (actionId: string) => Promise<void>;
+  onDelete?: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -232,20 +236,23 @@ export function DefaultEntryActions({
     return () => document.removeEventListener("click", handleClick, true);
   }, [menuOpen]);
 
-  if (actions.length === 0) return null;
+  if (actions.length === 0 && !onDelete) return null;
 
   const [primary, ...rest] = actions;
+  const hasOverflow = rest.length > 0 || !!onDelete;
 
   return (
     <div className="bunny-fm__entry-actions" onClick={(e) => e.stopPropagation()}>
-      <button
-        type="button"
-        className="bunny-fm__action-btn"
-        onClick={() => executeAction(primary.id)}
-      >
-        {primary.label}
-      </button>
-      {rest.length > 0 && (
+      {primary && (
+        <button
+          type="button"
+          className="bunny-fm__action-btn"
+          onClick={() => executeAction(primary.id)}
+        >
+          {primary.label}
+        </button>
+      )}
+      {hasOverflow && (
         <div className="bunny-fm__action-menu" ref={menuRef}>
           <button
             type="button"
@@ -270,6 +277,18 @@ export function DefaultEntryActions({
                   {action.label}
                 </button>
               ))}
+              {onDelete && (
+                <button
+                  type="button"
+                  className="bunny-fm__action-dropdown-item bunny-fm__action-dropdown-item--danger"
+                  onClick={() => {
+                    onDelete();
+                    setMenuOpen(false);
+                  }}
+                >
+                  Delete
+                </button>
+              )}
             </div>
           )}
         </div>

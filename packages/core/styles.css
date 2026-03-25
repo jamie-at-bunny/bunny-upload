@@ -54,7 +54,7 @@
   gap: 10px;
   font-family: var(--bunny-font);
   font-size: 14px;
-  color: var(--bunny-fg);
+  color: inherit;
 }
 
 .bunny-upload-button {
@@ -86,7 +86,7 @@
 }
 
 .bunny-upload-filename {
-  color: var(--bunny-fg);
+  color: inherit;
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -190,6 +190,35 @@
   justify-content: space-between;
   padding: 14px 16px;
   border-bottom: 1px solid var(--bunny-border);
+}
+
+.bunny-widget-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.bunny-widget-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--bunny-muted-fg);
+  font-family: var(--bunny-font);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 12px 12px;
+  margin-bottom: -14px;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.bunny-widget-tab:hover {
+  color: var(--bunny-fg);
+}
+
+.bunny-widget-tab--active {
+  color: var(--bunny-fg);
+  font-weight: 600;
+  border-bottom-color: var(--bunny-primary);
 }
 
 .bunny-widget-title {
@@ -554,7 +583,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 0 16px;
+  height: 48px;
   border-bottom: 1px solid var(--bunny-border);
   flex-shrink: 0;
   gap: 8px;
@@ -662,6 +692,13 @@
   overflow-y: auto;
   padding: 16px;
   min-height: 200px;
+  transition: background 0.15s;
+}
+
+.bunny-fm__content--drag-over {
+  background: oklch(0.751 0.167 54.7 / 0.06);
+  outline: 2px dashed var(--bunny-primary);
+  outline-offset: -2px;
 }
 
 .bunny-fm__loading,
@@ -889,6 +926,13 @@
   gap: 4px;
   justify-content: center;
   margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.bunny-fm__entry:hover .bunny-fm__entry-actions,
+.bunny-fm__entry-actions:focus-within {
+  opacity: 1;
 }
 
 .bunny-fm__list .bunny-fm__entry-actions {
@@ -968,6 +1012,14 @@
 
 .bunny-fm__action-dropdown-item:hover {
   background: var(--bunny-input);
+}
+
+.bunny-fm__action-dropdown-item--danger {
+  color: oklch(0.65 0.15 25);
+}
+
+.bunny-fm__action-dropdown-item--danger:hover {
+  background: oklch(0.65 0.15 25 / 0.1);
 }
 
 /* Footer */
