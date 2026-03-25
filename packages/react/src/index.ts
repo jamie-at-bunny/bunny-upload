@@ -14,6 +14,8 @@ export type { ConfigureOptions } from "./configure";
 // File manager
 export { useFileManager } from "./use-file-manager";
 export type { UseFileManagerOptions, UseFileManagerReturn } from "./use-file-manager";
+export { FileBrowser } from "./file-browser";
+export type { FileBrowserProps } from "./file-browser";
 export { FileManager } from "./file-manager";
 export type { FileManagerProps, FileManagerRenderProps } from "./file-manager";
 export { FileManagerWidget } from "./file-manager-widget";

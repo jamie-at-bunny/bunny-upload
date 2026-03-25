@@ -557,6 +557,35 @@
   padding: 14px 16px;
   border-bottom: 1px solid var(--bunny-border);
   flex-shrink: 0;
+  gap: 8px;
+}
+
+.bunny-fm__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bunny-fm__upload-btn {
+  background: none;
+  border: 1px solid var(--bunny-primary);
+  border-radius: 4px;
+  color: var(--bunny-primary);
+  font-size: 11px;
+  font-family: var(--bunny-font);
+  padding: 3px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.1s, border-color 0.1s, opacity 0.1s;
+}
+
+.bunny-fm__upload-btn:hover {
+  opacity: 0.8;
+}
+
+.bunny-fm__upload-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .bunny-fm__title {
@@ -589,6 +618,11 @@
   font-size: 13px;
   flex-shrink: 0;
   flex-wrap: wrap;
+}
+
+.bunny-fm__header .bunny-fm__breadcrumbs {
+  padding: 0;
+  border-bottom: none;
 }
 
 .bunny-fm__breadcrumb {
@@ -731,6 +765,23 @@
   background: var(--bunny-input);
 }
 
+.bunny-fm__entry--new-folder {
+  border: 2px dashed var(--bunny-border);
+  background: none;
+}
+
+.bunny-fm__entry--new-folder:hover {
+  border-color: var(--bunny-muted-fg);
+}
+
+.bunny-fm__entry--new-folder .bunny-fm__entry-thumb {
+  background: none;
+}
+
+.bunny-fm__entry--new-folder .bunny-fm__entry-name {
+  color: var(--bunny-muted-fg);
+}
+
 .bunny-fm__entry--selected {
   border-color: var(--bunny-primary);
   background: var(--bunny-input);
@@ -777,6 +828,16 @@
 .bunny-fm__entry-icon--file {
   background: var(--bunny-muted-fg);
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.bunny-fm__entry-icon--add {
+  background: var(--bunny-muted-fg);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.bunny-fm__entry-icon--upload {
+  background: var(--bunny-muted-fg);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 /* Selection check */
@@ -853,6 +914,16 @@
 .bunny-fm__action-btn:hover {
   color: var(--bunny-fg);
   border-color: var(--bunny-muted-fg);
+}
+
+.bunny-fm__action-btn--danger {
+  color: oklch(0.65 0.15 25);
+  border-color: oklch(0.65 0.15 25 / 0.4);
+}
+
+.bunny-fm__action-btn--danger:hover {
+  color: oklch(0.7 0.18 25);
+  border-color: oklch(0.7 0.18 25 / 0.6);
 }
 
 .bunny-fm__action-more {

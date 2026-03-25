@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import {
-  useFileManager,
+  FileBrowser,
   FileManager,
   FileManagerWidget,
+  useFileManager,
   formatBytes,
   type StorageEntry,
 } from "@bunny.net/upload-react";
 import { copyUrlAction, downloadAction } from "@bunny.net/file-manager-core/actions";
 
 export default function FilesPage() {
-  const [mode, setMode] = useState<"widget" | "render-props" | "hook">("widget");
+  const [mode, setMode] = useState<
+    "browser" | "manager" | "widget" | "render-props" | "hook"
+  >("browser");
 
   return (
     <main style={{ maxWidth: 800, margin: "40px auto", padding: "0 20px", fontFamily: "system-ui, sans-serif" }}>
@@ -20,12 +23,12 @@ export default function FilesPage() {
       </a>
       <h1 style={{ marginBottom: 8 }}>Bunny File Manager</h1>
       <p style={{ color: "#666", marginBottom: 24 }}>
-        Three ways to use the file manager — from zero-config widget to fully custom hook.
+        Five levels of control — from a read-only browser to a fully custom hook.
       </p>
 
       {/* Mode switcher */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-        {(["widget", "render-props", "hook"] as const).map((m) => (
+      <div style={{ display: "flex", gap: 8, marginBottom: 32, flexWrap: "wrap" }}>
+        {(["browser", "manager", "widget", "render-props", "hook"] as const).map((m) => (
           <button
             key={m}
             onClick={() => setMode(m)}
@@ -40,11 +43,13 @@ export default function FilesPage() {
               fontWeight: mode === m ? 600 : 400,
             }}
           >
-            {m === "widget" ? "Widget" : m === "render-props" ? "Render Props" : "Hook"}
+            {{ browser: "Browser", manager: "Manager", widget: "Widget", "render-props": "Render Props", hook: "Hook" }[m]}
           </button>
         ))}
       </div>
 
+      {mode === "browser" && <BrowserExample />}
+      {mode === "manager" && <ManagerExample />}
       {mode === "widget" && <WidgetExample />}
       {mode === "render-props" && <RenderPropsExample />}
       {mode === "hook" && <HookExample />}
@@ -52,8 +57,39 @@ export default function FilesPage() {
   );
 }
 
-// ── 1. Widget ──────────────────────────────────────────────────
-// Zero-config — opens a dialog, pick files, get URLs back.
+// ── 1. FileBrowser ────────────────────────────────────────────
+// Read-only. Browse files, navigate directories. No selection, no actions.
+
+function BrowserExample() {
+  return (
+    <Section
+      title="FileBrowser"
+      description="Read-only view of your storage zone. Navigate directories, see thumbnails. No selection or actions."
+    >
+      <FileBrowser />
+    </Section>
+  );
+}
+
+// ── 2. FileManager ────────────────────────────────────────────
+// Embedded full-featured manager with uploads and actions.
+
+function ManagerExample() {
+  return (
+    <Section
+      title="FileManager"
+      description="Embedded file manager with selection, uploads, and actions. No dialog — renders inline."
+    >
+      <FileManager
+        withUploads
+        withActions={[copyUrlAction, downloadAction]}
+      />
+    </Section>
+  );
+}
+
+// ── 3. FileManagerWidget ──────────────────────────────────────
+// Dialog-based picker with various configurations.
 
 function WidgetExample() {
   const [pickedUrls, setPickedUrls] = useState<string[]>([]);
@@ -62,10 +98,10 @@ function WidgetExample() {
   return (
     <Section
       title="FileManagerWidget"
-      description="A ready-to-use dialog with grid view, breadcrumbs, and selection. Pass onSelect or renderActions to control what happens."
+      description="A dialog with grid view, breadcrumbs, and selection. Supports uploads, actions, single/multi-select, and preselection."
     >
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
-        {/* Instant single select: click a file → fires immediately */}
+        {/* Instant single select */}
         <FileManagerWidget
           label="Pick one image"
           accept={["jpg", "jpeg", "png", "gif", "webp", "svg"]}
@@ -78,7 +114,7 @@ function WidgetExample() {
           )}
         />
 
-        {/* Multi-select with preselection via value */}
+        {/* Multi-select with preselection */}
         <FileManagerWidget
           label="Pick files"
           value={selectedPaths}
@@ -93,22 +129,14 @@ function WidgetExample() {
           )}
         />
 
-        {/* Registered actions: per-entry + footer */}
+        {/* With uploads and actions */}
         <FileManagerWidget
           label="Browse files"
-          actions={[copyUrlAction, downloadAction]}
-          renderActions={({ selected, urls, actions, executeAction }) => (
-            <>
-              {actions.map((a) => (
-                <button key={a.id} onClick={() => executeAction(a.id)} style={btnStyle}>
-                  {a.label}
-                </button>
-              ))}
-            </>
-          )}
+          withUploads
+          withActions={[copyUrlAction, downloadAction]}
           trigger={({ open }) => (
             <button onClick={open} style={btnStyle}>
-              Browse (with actions)
+              Browse (with uploads + actions)
             </button>
           )}
         />
@@ -139,20 +167,19 @@ function WidgetExample() {
   );
 }
 
-// ── 2. Render Props ────────────────────────────────────────────
-// Full control over the UI, but the FileManager component manages
-// the hook lifecycle for you.
+// ── 4. Render Props ───────────────────────────────────────────
+// Full control over the UI via render-prop children on FileManager.
 
 function RenderPropsExample() {
   const [inserted, setInserted] = useState<string[]>([]);
 
   return (
     <Section
-      title="<FileManager> (render props)"
+      title="FileManager (render props)"
       description="Build your own UI — the component provides all state and methods via render props."
     >
       <FileManager>
-        {({ entries, currentPath, status, breadcrumbs, selected, selectedUrls, navigate, toggleSelect, goUp, entryUrl }) => (
+        {({ entries, currentPath, status, breadcrumbs, selected, selectedUrls, navigate, toggleSelect, entryUrl }) => (
           <div style={{ border: "1px solid #e0e0e0", borderRadius: 8, overflow: "hidden" }}>
             {/* Breadcrumbs */}
             <div style={{ display: "flex", gap: 4, alignItems: "center", padding: "12px 16px", background: "#f9f9f9", borderBottom: "1px solid #e0e0e0", fontSize: 14, flexWrap: "wrap" }}>
@@ -232,9 +259,7 @@ function RenderPropsExample() {
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "#f0f6ff", borderTop: "1px solid #d0e0f0" }}>
                 <span style={{ fontSize: 13 }}>{selected.length} file(s) selected</span>
                 <button
-                  onClick={() => {
-                    setInserted(selectedUrls);
-                  }}
+                  onClick={() => setInserted(selectedUrls)}
                   style={{ ...btnStyle, background: "#0066cc", color: "#fff" }}
                 >
                   Insert selected
@@ -259,7 +284,7 @@ function RenderPropsExample() {
   );
 }
 
-// ── 3. Hook ────────────────────────────────────────────────────
+// ── 5. Hook ───────────────────────────────────────────────────
 // Maximum control — just the state and methods, build everything yourself.
 
 function HookExample() {
