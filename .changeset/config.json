@@ -35,6 +35,7 @@
     "example-solidstart",
     "example-tanstack-start",
     "example-vanilla",
-    "example-vue"
+    "example-vue",
+    "example-nextjs-i18n"
   ]
 }
