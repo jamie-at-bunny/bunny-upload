@@ -45,6 +45,35 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Focus visible                                                       */
+/* ------------------------------------------------------------------ */
+
+:where(
+  .bunny-upload-button,
+  .bunny-widget-trigger,
+  .bunny-widget-tab,
+  .bunny-widget-close,
+  .bunny-widget-dropzone,
+  .bunny-widget-file-remove,
+  .bunny-widget-upload,
+  .bunny-widget-done,
+  .bunny-fm__trigger,
+  .bunny-fm__close,
+  .bunny-fm__breadcrumb,
+  .bunny-fm__entry,
+  .bunny-fm__action-btn,
+  .bunny-fm__action-dropdown-item,
+  .bunny-fm__confirm,
+  .bunny-fm__retry,
+  .bunny-fm__upload-btn,
+  .bunny-upload-retry,
+  .bunny-upload-remove
+):focus-visible {
+  outline: 2px solid var(--bunny-primary);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
 /* BunnyUpload — inline button                                         */
 /* ------------------------------------------------------------------ */
 

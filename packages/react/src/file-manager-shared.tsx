@@ -72,6 +72,7 @@ export function Breadcrumbs({
               crumb.path === currentPath ? " bunny-fm__breadcrumb--active" : ""
             }`}
             onClick={() => onNavigate(crumb.path)}
+            {...(crumb.path === currentPath ? { "aria-current": "page" as const } : {})}
           >
             {crumb.label}
           </button>
@@ -93,11 +94,11 @@ export function ContentStatus({
   onRetry: () => void;
 }) {
   if (status === "loading") {
-    return <div className="bunny-fm__loading">Loading…</div>;
+    return <div className="bunny-fm__loading" role="status" aria-live="polite">Loading…</div>;
   }
   if (status === "error") {
     return (
-      <div className="bunny-fm__error">
+      <div className="bunny-fm__error" role="alert">
         {error}
         <button type="button" className="bunny-fm__retry" onClick={onRetry}>
           Retry
@@ -144,6 +145,7 @@ export function EntryCard({
       onClick={onClick}
       role="button"
       tabIndex={0}
+      aria-label={`${entry.isDirectory ? "Folder" : "File"}: ${entry.objectName}${isSelected ? " (selected)" : ""}`}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -181,6 +183,7 @@ export function EntryCard({
               }}
               onClick={(e) => e.stopPropagation()}
               tabIndex={-1}
+              aria-label={`Select ${entry.objectName}`}
             />
           </span>
         )}
@@ -252,15 +255,18 @@ export function DefaultEntryActions({
             className="bunny-fm__action-btn bunny-fm__action-more"
             onClick={() => setMenuOpen((v) => !v)}
             aria-label="More actions"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
           >
             &hellip;
           </button>
           {menuOpen && (
-            <div className="bunny-fm__action-dropdown">
+            <div className="bunny-fm__action-dropdown" role="menu">
               {rest.map((action) => (
                 <button
                   key={action.id}
                   type="button"
+                  role="menuitem"
                   className="bunny-fm__action-dropdown-item"
                   onClick={() => {
                     executeAction(action.id);
@@ -273,6 +279,7 @@ export function DefaultEntryActions({
               {onDelete && (
                 <button
                   type="button"
+                  role="menuitem"
                   className="bunny-fm__action-dropdown-item bunny-fm__action-dropdown-item--danger"
                   onClick={() => {
                     onDelete();
@@ -302,6 +309,7 @@ export function NewFolderEntry({
       className="bunny-fm__entry bunny-fm__entry--new-folder"
       role="button"
       tabIndex={0}
+      aria-label="Create new folder"
       onClick={() => {
         const name = prompt("Folder name:");
         if (name?.trim()) onCreate(name.trim());
@@ -357,6 +365,7 @@ export function UploadFileEntry({
       className="bunny-fm__entry bunny-fm__entry--new-folder"
       role="button"
       tabIndex={0}
+      aria-label={uploading ? "Uploading file" : "Upload file"}
       onClick={() => inputRef.current?.click()}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -377,6 +386,7 @@ export function UploadFileEntry({
         multiple
         onChange={handleChange}
         style={{ display: "none" }}
+        aria-hidden="true"
       />
     </div>
   );

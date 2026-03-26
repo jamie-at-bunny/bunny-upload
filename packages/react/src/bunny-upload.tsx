@@ -80,7 +80,7 @@ export function BunnyUpload({
         style={{ display: "none" }}
       />
       {latestFile && (
-        <span className="bunny-upload-status">
+        <span className="bunny-upload-status" aria-live="polite">
           <span className="bunny-upload-filename">{latestFile.name}</span>
           {latestFile.status === "uploading" && (
             <span className="bunny-upload-progress">

@@ -17,7 +17,7 @@ export function UploadFileList({
   if (files.length === 0) return null;
 
   return (
-    <ul className={`bunny-upload-file-list ${className ?? ""}`.trim()}>
+    <ul className={`bunny-upload-file-list ${className ?? ""}`.trim()} aria-live="polite">
       {files.map((file) => (
         <li
           key={file.id}
@@ -31,7 +31,14 @@ export function UploadFileList({
           </div>
 
           {file.status === "uploading" && (
-            <div className="bunny-upload-progress">
+            <div
+              className="bunny-upload-progress"
+              role="progressbar"
+              aria-valuenow={Math.round(file.progress)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Uploading ${file.name}`}
+            >
               <div
                 className="bunny-upload-progress-bar"
                 style={{ width: `${file.progress}%` }}
@@ -40,7 +47,7 @@ export function UploadFileList({
           )}
 
           {file.status === "error" && (
-            <div className="bunny-upload-file-error">
+            <div className="bunny-upload-file-error" role="alert">
               <span>{file.error}</span>
               {onRetry && (
                 <button className="bunny-upload-retry" onClick={onRetry}>

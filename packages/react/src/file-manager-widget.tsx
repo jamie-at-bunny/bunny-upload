@@ -245,6 +245,8 @@ export function FileManagerWidget({
           onClick={(e) => {
             if (e.target === dialogRef.current) close();
           }}
+          aria-modal="true"
+          aria-label={label}
         >
           <div className="bunny-fm">
             {/* Header */}

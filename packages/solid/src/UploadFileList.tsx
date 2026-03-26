@@ -24,7 +24,14 @@ export function UploadFileList(props: UploadFileListProps) {
               </div>
 
               <Show when={file.status === "uploading"}>
-                <div class="bunny-upload-progress">
+                <div
+                  class="bunny-upload-progress"
+                  role="progressbar"
+                  aria-valuenow={Math.round(file.progress)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`Uploading ${file.name}`}
+                >
                   <div
                     class="bunny-upload-progress-bar"
                     style={{ width: `${file.progress}%` }}
@@ -33,7 +40,7 @@ export function UploadFileList(props: UploadFileListProps) {
               </Show>
 
               <Show when={file.status === "error"}>
-                <div class="bunny-upload-file-error">
+                <div class="bunny-upload-file-error" role="alert">
                   <span>{file.error}</span>
                   <Show when={props.onRetry}>
                     <button class="bunny-upload-retry" onClick={props.onRetry}>

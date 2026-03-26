@@ -92,6 +92,8 @@ export function UploadWidget(props: UploadWidgetProps) {
           onClick={(e) => {
             if (e.target === dialogRef) close();
           }}
+          aria-modal="true"
+          aria-label={label()}
         >
           <div class="bunny-widget">
             <div class="bunny-widget-header">
@@ -120,6 +122,7 @@ export function UploadWidget(props: UploadWidgetProps) {
               onClick={() => inputRef?.click()}
               role="button"
               tabIndex={0}
+              aria-label="Drop files here or click to browse"
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") inputRef?.click();
               }}
@@ -151,7 +154,7 @@ export function UploadWidget(props: UploadWidgetProps) {
             </div>
 
             <Show when={files().length > 0}>
-              <ul class="bunny-widget-file-list">
+              <ul class="bunny-widget-file-list" aria-live="polite">
                 <For each={files()}>
                   {(file) => (
                     <li class={`bunny-widget-file bunny-widget-file--${file.status}`}>
@@ -161,7 +164,14 @@ export function UploadWidget(props: UploadWidgetProps) {
                       </span>
 
                       <Show when={file.status === "uploading"}>
-                        <div class="bunny-widget-progress">
+                        <div
+                          class="bunny-widget-progress"
+                          role="progressbar"
+                          aria-valuenow={Math.round(file.progress)}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={`Uploading ${file.name}`}
+                        >
                           <div
                             class="bunny-widget-progress-bar"
                             style={{ width: `${file.progress}%` }}

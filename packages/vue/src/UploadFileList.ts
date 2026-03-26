@@ -38,7 +38,14 @@ export const UploadFileList = defineComponent({
               ]),
 
               file.status === "uploading" &&
-                h("div", { class: "bunny-upload-progress" }, [
+                h("div", {
+                  class: "bunny-upload-progress",
+                  role: "progressbar",
+                  "aria-valuenow": Math.round(file.progress),
+                  "aria-valuemin": 0,
+                  "aria-valuemax": 100,
+                  "aria-label": `Uploading ${file.name}`,
+                }, [
                   h("div", {
                     class: "bunny-upload-progress-bar",
                     style: { width: `${file.progress}%` },
@@ -46,7 +53,7 @@ export const UploadFileList = defineComponent({
                 ]),
 
               file.status === "error" &&
-                h("div", { class: "bunny-upload-file-error" }, [
+                h("div", { class: "bunny-upload-file-error", role: "alert" }, [
                   h("span", null, file.error),
                   h(
                     "button",

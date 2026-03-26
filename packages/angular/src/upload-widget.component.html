@@ -1,0 +1,109 @@
+<ng-content select="[trigger]">
+  <button type="button" class="bunny-widget-trigger" (click)="open()">
+    {{ label() }}
+  </button>
+</ng-content>
+
+@if (isOpen()) {
+  <dialog
+    #dialog
+    class="bunny-widget-dialog"
+    (close)="close()"
+    (click)="onBackdropClick($event)"
+    aria-modal="true"
+    [attr.aria-label]="label()"
+  >
+    <div class="bunny-widget">
+      <div class="bunny-widget-header">
+        <span class="bunny-widget-title">{{ label() }}</span>
+        <button type="button" class="bunny-widget-close" (click)="close()" aria-label="Close">
+          &times;
+        </button>
+      </div>
+
+      <div
+        class="bunny-widget-dropzone"
+        [class.bunny-widget-dropzone--active]="isDragOver()"
+        (drop)="onDrop($event)"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (click)="fileInput.click()"
+        (keydown.enter)="fileInput.click()"
+        (keydown.space)="fileInput.click()"
+        role="button"
+        tabindex="0"
+        aria-label="Drop files here or click to browse"
+      >
+        <input
+          #fileInput
+          type="file"
+          [multiple]="maxFiles() !== 1"
+          [accept]="acceptString()"
+          (change)="onFileChange($event)"
+          hidden
+        />
+        <p class="bunny-widget-dropzone-text">
+          {{ isDragOver() ? "Drop to upload" : "Drop files here or click to browse" }}
+        </p>
+        @if (maxSize()) {
+          <p class="bunny-widget-hint">
+            Max {{ maxSize() }}@if (maxFiles()) { &middot; {{ maxFiles() }} file{{ maxFiles()! > 1 ? "s" : "" }}}
+          </p>
+        }
+      </div>
+
+      @if (uploadService.files().length > 0) {
+        <ul class="bunny-widget-file-list" aria-live="polite">
+          @for (file of uploadService.files(); track file.id) {
+            <li class="bunny-widget-file" [class]="'bunny-widget-file--' + file.status">
+              <span class="bunny-widget-file-name">{{ file.name }}</span>
+              <span class="bunny-widget-file-size">{{ formatFileSize(file.size) }}</span>
+              @if (file.status === "uploading") {
+                <div class="bunny-widget-progress"
+                  role="progressbar"
+                  [attr.aria-valuenow]="file.progress | number:'1.0-0'"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-label]="'Uploading ' + file.name"
+                >
+                  <div class="bunny-widget-progress-bar" [style.width.%]="file.progress"></div>
+                </div>
+              }
+              @if (file.status === "complete") {
+                <span class="bunny-widget-file-complete">&#10003;</span>
+              }
+              @if (file.status === "error") {
+                <span class="bunny-widget-file-error" role="alert">{{ file.error ?? "Failed" }}</span>
+              }
+              @if (file.status === "idle" || file.status === "error") {
+                <button
+                  class="bunny-widget-file-remove"
+                  (click)="uploadService.removeFile(file.id)"
+                  [attr.aria-label]="'Remove ' + file.name"
+                >&times;</button>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="bunny-widget-footer">
+        @if (!autoUpload() && hasIdleFiles()) {
+          <button
+            type="button"
+            class="bunny-widget-upload"
+            (click)="doUpload()"
+            [disabled]="uploadService.isUploading()"
+          >
+            {{ uploadService.isUploading() ? "Uploading..." : "Upload" }}
+          </button>
+        }
+        @if (allComplete()) {
+          <button type="button" class="bunny-widget-done" (click)="close()">
+            Done
+          </button>
+        }
+      </div>
+    </div>
+  </dialog>
+}

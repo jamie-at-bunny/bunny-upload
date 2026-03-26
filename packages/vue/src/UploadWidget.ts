@@ -115,6 +115,8 @@ export const UploadWidget = defineComponent({
               onClick: (e: MouseEvent) => {
                 if (e.target === dialogRef.value) close();
               },
+              "aria-modal": "true",
+              "aria-label": props.label,
             },
             [
               h("div", { class: "bunny-widget" }, [
@@ -153,6 +155,7 @@ export const UploadWidget = defineComponent({
                     onClick: () => fileInputRef.value?.click(),
                     role: "button",
                     tabindex: 0,
+                    "aria-label": "Drop files here or click to browse",
                     onKeydown: (e: KeyboardEvent) => {
                       if (e.key === "Enter" || e.key === " ")
                         fileInputRef.value?.click();
@@ -187,7 +190,7 @@ export const UploadWidget = defineComponent({
                 files.value.length > 0 &&
                   h(
                     "ul",
-                    { class: "bunny-widget-file-list" },
+                    { class: "bunny-widget-file-list", "aria-live": "polite" },
                     files.value.map((file) =>
                       h(
                         "li",
@@ -207,7 +210,14 @@ export const UploadWidget = defineComponent({
                             formatBytes(file.size)
                           ),
                           file.status === "uploading" &&
-                            h("div", { class: "bunny-widget-progress" }, [
+                            h("div", {
+                              class: "bunny-widget-progress",
+                              role: "progressbar",
+                              "aria-valuenow": Math.round(file.progress),
+                              "aria-valuemin": 0,
+                              "aria-valuemax": 100,
+                              "aria-label": `Uploading ${file.name}`,
+                            }, [
                               h("div", {
                                 class: "bunny-widget-progress-bar",
                                 style: { width: `${file.progress}%` },

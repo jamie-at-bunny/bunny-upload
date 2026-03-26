@@ -1,0 +1,39 @@
+@if (files().length > 0) {
+  <ul class="bunny-upload-file-list">
+    @for (file of files(); track file.id) {
+      <li class="bunny-upload-file" [class]="'bunny-upload-file--' + file.status">
+        <div class="bunny-upload-file-info">
+          <span class="bunny-upload-file-name">{{ file.name }}</span>
+          <span class="bunny-upload-file-size">{{ formatFileSize(file.size) }}</span>
+        </div>
+        @if (file.status === "uploading") {
+          <div class="bunny-upload-progress"
+            role="progressbar"
+            [attr.aria-valuenow]="file.progress | number:'1.0-0'"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-label]="'Uploading ' + file.name"
+          >
+            <div class="bunny-upload-progress-bar" [style.width.%]="file.progress"></div>
+          </div>
+        }
+        @if (file.status === "error") {
+          <div class="bunny-upload-file-error" role="alert">
+            <span>{{ file.error }}</span>
+            <button class="bunny-upload-retry" (click)="retry.emit()">Retry</button>
+          </div>
+        }
+        @if (file.status === "complete") {
+          <span class="bunny-upload-file-complete">Uploaded</span>
+        }
+        @if (file.status === "idle" || file.status === "error") {
+          <button
+            class="bunny-upload-remove"
+            (click)="remove.emit(file.id)"
+            [attr.aria-label]="'Remove ' + file.name"
+          >&times;</button>
+        }
+      </li>
+    }
+  </ul>
+}
