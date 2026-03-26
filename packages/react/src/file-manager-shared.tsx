@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { StorageEntry, FileManagerAction } from "@bunny.net/file-manager-core";
-import { formatBytes } from "@bunny.net/upload-shared";
+import { formatBytes, defaultLocale } from "@bunny.net/upload-shared";
+import type { BunnyUploadLocale } from "@bunny.net/upload-shared";
 
 // ── Image helpers ──────────────────────────────────────────────
 
@@ -56,13 +57,15 @@ export function Breadcrumbs({
   breadcrumbs,
   currentPath,
   onNavigate,
+  locale: l = defaultLocale,
 }: {
   breadcrumbs: { label: string; path: string }[];
   currentPath: string;
   onNavigate: (path: string) => void;
+  locale?: BunnyUploadLocale;
 }) {
   return (
-    <nav className="bunny-fm__breadcrumbs" aria-label="File navigation">
+    <nav className="bunny-fm__breadcrumbs" aria-label={l.ariaFileNavigation}>
       {breadcrumbs.map((crumb, i) => (
         <React.Fragment key={crumb.path}>
           {i > 0 && <span className="bunny-fm__breadcrumb-sep">/</span>}
@@ -87,27 +90,29 @@ export function ContentStatus({
   error,
   isEmpty,
   onRetry,
+  locale: l = defaultLocale,
 }: {
   status: string;
   error?: string;
   isEmpty: boolean;
   onRetry: () => void;
+  locale?: BunnyUploadLocale;
 }) {
   if (status === "loading") {
-    return <div className="bunny-fm__loading" role="status" aria-live="polite">Loading…</div>;
+    return <div className="bunny-fm__loading" role="status" aria-live="polite">{l.loading}</div>;
   }
   if (status === "error") {
     return (
       <div className="bunny-fm__error" role="alert">
         {error}
         <button type="button" className="bunny-fm__retry" onClick={onRetry}>
-          Retry
+          {l.retry}
         </button>
       </div>
     );
   }
   if (status === "idle" && isEmpty) {
-    return <div className="bunny-fm__empty">No files found</div>;
+    return <div className="bunny-fm__empty">{l.noFilesFound}</div>;
   }
   return null;
 }
@@ -122,6 +127,7 @@ export interface EntryCardProps {
   onSelect?: () => void;
   onDelete?: () => void;
   renderActions?: React.ReactNode;
+  locale?: BunnyUploadLocale;
 }
 
 export function EntryCard({
@@ -134,6 +140,7 @@ export function EntryCard({
   onSelect,
   onDelete,
   renderActions,
+  locale: l = defaultLocale,
 }: EntryCardProps) {
   const isImage = isImageEntry(entry);
 
@@ -145,7 +152,7 @@ export function EntryCard({
       onClick={onClick}
       role="button"
       tabIndex={0}
-      aria-label={`${entry.isDirectory ? "Folder" : "File"}: ${entry.objectName}${isSelected ? " (selected)" : ""}`}
+      aria-label={l.ariaEntryLabel(entry.isDirectory ? "folder" : "file", entry.objectName, isSelected)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -183,7 +190,7 @@ export function EntryCard({
               }}
               onClick={(e) => e.stopPropagation()}
               tabIndex={-1}
-              aria-label={`Select ${entry.objectName}`}
+              aria-label={l.ariaSelectEntry(entry.objectName)}
             />
           </span>
         )}
@@ -213,10 +220,12 @@ export function DefaultEntryActions({
   actions,
   executeAction,
   onDelete,
+  locale: l = defaultLocale,
 }: {
   actions: FileManagerAction[];
   executeAction: (actionId: string) => Promise<void>;
   onDelete?: () => void;
+  locale?: BunnyUploadLocale;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -254,7 +263,7 @@ export function DefaultEntryActions({
             type="button"
             className="bunny-fm__action-btn bunny-fm__action-more"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="More actions"
+            aria-label={l.ariaMoreActions}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
           >
@@ -286,7 +295,7 @@ export function DefaultEntryActions({
                     setMenuOpen(false);
                   }}
                 >
-                  Delete
+                  {l.delete}
                 </button>
               )}
             </div>
@@ -301,23 +310,25 @@ export function DefaultEntryActions({
 
 export function NewFolderEntry({
   onCreate,
+  locale: l = defaultLocale,
 }: {
   onCreate: (name: string) => Promise<void>;
+  locale?: BunnyUploadLocale;
 }) {
   return (
     <div
       className="bunny-fm__entry bunny-fm__entry--new-folder"
       role="button"
       tabIndex={0}
-      aria-label="Create new folder"
+      aria-label={l.ariaCreateNewFolder}
       onClick={() => {
-        const name = prompt("Folder name:");
+        const name = prompt(l.folderNamePrompt);
         if (name?.trim()) onCreate(name.trim());
       }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          const name = prompt("Folder name:");
+          const name = prompt(l.folderNamePrompt);
           if (name?.trim()) onCreate(name.trim());
         }
       }}
@@ -325,7 +336,7 @@ export function NewFolderEntry({
       <div className="bunny-fm__entry-thumb">
         <span className="bunny-fm__entry-icon bunny-fm__entry-icon--add" />
       </div>
-      <span className="bunny-fm__entry-name">New folder</span>
+      <span className="bunny-fm__entry-name">{l.newFolder}</span>
     </div>
   );
 }
@@ -335,9 +346,11 @@ export function NewFolderEntry({
 export function UploadFileEntry({
   endpoint,
   onUploaded,
+  locale: l = defaultLocale,
 }: {
   endpoint: string;
   onUploaded: () => void;
+  locale?: BunnyUploadLocale;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -365,7 +378,7 @@ export function UploadFileEntry({
       className="bunny-fm__entry bunny-fm__entry--new-folder"
       role="button"
       tabIndex={0}
-      aria-label={uploading ? "Uploading file" : "Upload file"}
+      aria-label={uploading ? l.uploadingFile : l.uploadFile}
       onClick={() => inputRef.current?.click()}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -378,7 +391,7 @@ export function UploadFileEntry({
         <span className="bunny-fm__entry-icon bunny-fm__entry-icon--upload" />
       </div>
       <span className="bunny-fm__entry-name">
-        {uploading ? "Uploading…" : "Upload file"}
+        {uploading ? l.uploadingFile : l.uploadFile}
       </span>
       <input
         ref={inputRef}

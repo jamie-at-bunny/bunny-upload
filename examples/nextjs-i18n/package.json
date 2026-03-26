@@ -1,0 +1,27 @@
+{
+  "name": "example-nextjs-i18n",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@bunny.net/upload-core": "workspace:*",
+    "@bunny.net/upload-handler": "workspace:*",
+    "@bunny.net/upload-next": "workspace:*",
+    "@bunny.net/upload-react": "workspace:*",
+    "@bunny.net/file-manager-handler": "workspace:*",
+    "@bunny.net/file-manager-core": "workspace:*",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.5.0"
+  }
+}

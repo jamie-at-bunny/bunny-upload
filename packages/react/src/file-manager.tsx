@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import type { StorageEntry, FileManagerAction } from "@bunny.net/file-manager-core";
+import { resolveLocale } from "@bunny.net/upload-shared";
+import type { BunnyUploadLocale } from "@bunny.net/upload-shared";
 import { useFileManager, type UseFileManagerOptions } from "./use-file-manager";
 import { useBunnyUpload } from "./use-bunny-upload";
 import {
@@ -70,6 +72,8 @@ export interface FileManagerProps extends UseFileManagerOptions {
    * When provided, the built-in UI is skipped entirely.
    */
   children?: (props: FileManagerRenderProps) => React.ReactNode;
+  /** Override user-facing strings for i18n */
+  locale?: Partial<BunnyUploadLocale>;
 }
 
 const DEFAULT_UPLOAD_ENDPOINT = "/.bunny/upload";
@@ -99,8 +103,10 @@ export function FileManager({
   renderEntryActions,
   className,
   children,
+  locale: localeOverrides,
   ...options
 }: FileManagerProps) {
+  const l = resolveLocale(localeOverrides);
   const fm = useFileManager({
     ...options,
     actions: withActions ?? options.actions,
@@ -192,23 +198,24 @@ export function FileManager({
           breadcrumbs={fm.breadcrumbs}
           currentPath={fm.currentPath}
           onNavigate={fm.navigate}
+          locale={l}
         />
         <div className="bunny-fm__header-actions">
           {fm.selected.length > 0 && (
             <>
               <span className="bunny-fm__selection-count">
-                {fm.selected.length} selected
+                {l.selectedCount(fm.selected.length)}
               </span>
               <button
                 type="button"
                 className="bunny-fm__action-btn bunny-fm__action-btn--danger"
                 onClick={() => {
-                  if (confirm(`Delete ${fm.selected.length} item(s)?`)) {
+                  if (confirm(l.deleteCountConfirm(fm.selected.length))) {
                     fm.deleteSelected();
                   }
                 }}
               >
-                Delete
+                {l.delete}
               </button>
             </>
           )}
@@ -225,11 +232,12 @@ export function FileManager({
           error={fm.error}
           isEmpty={false}
           onRetry={fm.refresh}
+          locale={l}
         />
 
         {fm.status === "idle" && (
           <div className={view === "grid" ? "bunny-fm__grid" : "bunny-fm__list"}>
-            <NewFolderEntry onCreate={fm.createFolder} />
+            <NewFolderEntry onCreate={fm.createFolder} locale={l} />
             {visibleEntries.map((entry) => {
               const isSelected = fm.selected.some((s) => s.guid === entry.guid);
               const url = fm.cdnUrl(`${entry.path}${entry.objectName}`);
@@ -248,6 +256,7 @@ export function FileManager({
                       ? () => fm.toggleSelect(entry.guid)
                       : undefined
                   }
+                  locale={l}
                   renderActions={
                     renderEntryActions && hasActions && !entry.isDirectory ? (
                       <div
@@ -272,10 +281,11 @@ export function FileManager({
                           const path = entry.isDirectory
                             ? `${entry.path}${entry.objectName}/`
                             : `${entry.path}${entry.objectName}`;
-                          if (confirm(`Delete "${entry.objectName}"?`)) {
+                          if (confirm(l.deleteConfirm(entry.objectName))) {
                             fm.deleteEntry(path);
                           }
                         }}
+                        locale={l}
                       />
                     )
                   }
@@ -283,7 +293,7 @@ export function FileManager({
               );
             })}
             {uploadEndpoint && (
-              <UploadFileEntry endpoint={uploadEndpoint} onUploaded={fm.refresh} />
+              <UploadFileEntry endpoint={uploadEndpoint} onUploaded={fm.refresh} locale={l} />
             )}
           </div>
         )}

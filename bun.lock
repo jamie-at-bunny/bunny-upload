@@ -60,6 +60,27 @@
         "typescript": "^5.5.0",
       },
     },
+    "examples/nextjs-i18n": {
+      "name": "example-nextjs-i18n",
+      "version": "0.0.0",
+      "dependencies": {
+        "@bunny.net/file-manager-core": "workspace:*",
+        "@bunny.net/file-manager-handler": "workspace:*",
+        "@bunny.net/upload-core": "workspace:*",
+        "@bunny.net/upload-handler": "workspace:*",
+        "@bunny.net/upload-next": "workspace:*",
+        "@bunny.net/upload-react": "workspace:*",
+        "next": "^15.0.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "devDependencies": {
+        "@types/node": "^22.0.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "typescript": "^5.5.0",
+      },
+    },
     "examples/nuxt": {
       "name": "example-nuxt",
       "version": "0.0.0",
@@ -386,6 +407,7 @@
       "dependencies": {
         "@bunny.net/upload-core": "workspace:*",
         "@bunny.net/upload-handler": "workspace:*",
+        "@bunny.net/upload-shared": "workspace:*",
       },
       "devDependencies": {
         "tsup": "^8.0.0",
@@ -1913,6 +1935,8 @@
     "example-hono": ["example-hono@workspace:examples/hono"],
 
     "example-nextjs": ["example-nextjs@workspace:examples/nextjs"],
+
+    "example-nextjs-i18n": ["example-nextjs-i18n@workspace:examples/nextjs-i18n"],
 
     "example-nuxt": ["example-nuxt@workspace:examples/nuxt"],
 
