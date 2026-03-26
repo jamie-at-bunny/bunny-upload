@@ -1,7 +1,9 @@
 {
   "name": "@bunny.net/upload-core",
-  "publishConfig": { "access": "public" },
-  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.0.1",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -19,7 +21,10 @@
     },
     "./styles.css": "./styles.css"
   },
-  "files": ["dist", "styles.css"],
+  "files": [
+    "dist",
+    "styles.css"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
