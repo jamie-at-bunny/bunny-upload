@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileState, UploadResult } from "@bunny.net/upload-core";
 import { formatBytes } from "@bunny.net/upload-core";
+import { resolveLocale } from "@bunny.net/upload-shared";
+import type { BunnyUploadLocale } from "@bunny.net/upload-shared";
 import type { StorageEntry } from "@bunny.net/file-manager-core";
 import { useBunnyUpload } from "./use-bunny-upload";
 import { useFileManager, type UseFileManagerOptions } from "./use-file-manager";
@@ -30,6 +32,8 @@ export interface UploadWidgetProps {
    * Pass an object to configure endpoint, cdnBase, etc.
    */
   withFileManager?: boolean | UseFileManagerOptions;
+  /** Override user-facing strings for i18n */
+  locale?: Partial<BunnyUploadLocale>;
 }
 
 export function UploadWidget({
@@ -40,10 +44,13 @@ export function UploadWidget({
   onComplete,
   onError,
   autoUpload = true,
-  label = "Upload files",
+  label,
   trigger,
   withFileManager,
+  locale: localeOverrides,
 }: UploadWidgetProps) {
+  const l = resolveLocale(localeOverrides);
+  const resolvedLabel = label ?? l.uploadFiles;
   const [isOpen, setIsOpen] = useState(false);
   const [tab, setTab] = useState<"upload" | "browse">("upload");
   const { files, addFiles, removeFile, upload, reset, isUploading } =
@@ -102,7 +109,7 @@ export function UploadWidget({
         trigger({ open })
       ) : (
         <button type="button" className="bunny-widget-trigger" onClick={open}>
-          {label}
+          {resolvedLabel}
         </button>
       )}
 
@@ -115,7 +122,7 @@ export function UploadWidget({
             if (e.target === dialogRef.current) close();
           }}
           aria-modal="true"
-          aria-label={label}
+          aria-label={resolvedLabel}
         >
           <div className="bunny-widget">
             <div className="bunny-widget-header">
@@ -126,24 +133,24 @@ export function UploadWidget({
                     className={`bunny-widget-tab${tab === "upload" ? " bunny-widget-tab--active" : ""}`}
                     onClick={() => setTab("upload")}
                   >
-                    Upload
+                    {l.uploadTab}
                   </button>
                   <button
                     type="button"
                     className={`bunny-widget-tab${tab === "browse" ? " bunny-widget-tab--active" : ""}`}
                     onClick={() => setTab("browse")}
                   >
-                    Browse
+                    {l.browseTab}
                   </button>
                 </div>
               ) : (
-                <span className="bunny-widget-title">{label}</span>
+                <span className="bunny-widget-title">{resolvedLabel}</span>
               )}
               <button
                 type="button"
                 className="bunny-widget-close"
                 onClick={close}
-                aria-label="Close"
+                aria-label={l.ariaClose}
               >
                 &times;
               </button>
@@ -165,7 +172,7 @@ export function UploadWidget({
                   onClick={() => inputRef.current?.click()}
                   role="button"
                   tabIndex={0}
-                  aria-label="Drop files here or click to browse"
+                  aria-label={l.ariaDropzone}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ")
                       inputRef.current?.click();
@@ -186,16 +193,15 @@ export function UploadWidget({
                   />
                   <p className="bunny-widget-dropzone-text">
                     {isDragOver
-                      ? "Drop to upload"
-                      : "Drop files here or click to browse"}
+                      ? l.dropToUpload
+                      : l.dropOrBrowse}
                   </p>
                   {maxSize && (
                     <p className="bunny-widget-hint">
-                      Max{" "}
-                      {typeof maxSize === "string"
-                        ? maxSize
-                        : formatBytes(maxSize)}
-                      {maxFiles && ` · ${maxFiles} file${maxFiles > 1 ? "s" : ""}`}
+                      {l.maxSizeHint(
+                        typeof maxSize === "string" ? maxSize : formatBytes(maxSize),
+                        maxFiles
+                      )}
                     </p>
                   )}
                 </div>
@@ -219,7 +225,7 @@ export function UploadWidget({
                             aria-valuenow={Math.round(file.progress)}
                             aria-valuemin={0}
                             aria-valuemax={100}
-                            aria-label={`Uploading ${file.name}`}
+                            aria-label={l.ariaUploadingFile(file.name)}
                           >
                             <div
                               className="bunny-widget-progress-bar"
@@ -234,7 +240,7 @@ export function UploadWidget({
 
                         {file.status === "error" && (
                           <span className="bunny-widget-file-error">
-                            {file.error ?? "Failed"}
+                            {file.error ?? l.failed}
                           </span>
                         )}
 
@@ -242,7 +248,7 @@ export function UploadWidget({
                           <button
                             className="bunny-widget-file-remove"
                             onClick={() => removeFile(file.id)}
-                            aria-label={`Remove ${file.name}`}
+                            aria-label={l.ariaRemoveFile(file.name)}
                           >
                             &times;
                           </button>
@@ -260,7 +266,7 @@ export function UploadWidget({
                       onClick={() => upload()}
                       disabled={isUploading}
                     >
-                      {isUploading ? "Uploading..." : "Upload"}
+                      {isUploading ? l.uploading : l.upload}
                     </button>
                   )}
                   {allComplete && (
@@ -269,7 +275,7 @@ export function UploadWidget({
                       className="bunny-widget-done"
                       onClick={close}
                     >
-                      Done
+                      {l.done}
                     </button>
                   )}
                 </div>
@@ -279,6 +285,7 @@ export function UploadWidget({
             {tab === "browse" && hasBrowse && (
               <BrowseTab
                 options={typeof withFileManager === "object" ? withFileManager : {}}
+                locale={l}
                 onSelect={(urls) => {
                   onComplete?.(urls.map((url) => ({
                     name: url.split("/").pop() ?? "",
@@ -302,9 +309,11 @@ export function UploadWidget({
 function BrowseTab({
   options,
   onSelect,
+  locale: l = resolveLocale(),
 }: {
   options: UseFileManagerOptions;
   onSelect: (urls: string[]) => void;
+  locale?: BunnyUploadLocale;
 }) {
   const fm = useFileManager(options);
   const visibleEntries = useMemo(
@@ -333,6 +342,7 @@ function BrowseTab({
         breadcrumbs={fm.breadcrumbs}
         currentPath={fm.currentPath}
         onNavigate={fm.navigate}
+        locale={l}
       />
 
       <div className="bunny-fm__content">
@@ -341,11 +351,12 @@ function BrowseTab({
           error={fm.error}
           isEmpty={false}
           onRetry={fm.refresh}
+          locale={l}
         />
 
         {fm.status === "idle" && (
           <div className="bunny-fm__grid">
-            <NewFolderEntry onCreate={fm.createFolder} />
+            <NewFolderEntry onCreate={fm.createFolder} locale={l} />
             {visibleEntries.map((entry) => {
               const isSelected = fm.selected.some((s) => s.guid === entry.guid);
               const url = fm.cdnUrl(`${entry.path}${entry.objectName}`);
@@ -363,6 +374,7 @@ function BrowseTab({
                       ? () => fm.toggleSelect(entry.guid)
                       : undefined
                   }
+                  locale={l}
                 />
               );
             })}
@@ -377,7 +389,7 @@ function BrowseTab({
             className="bunny-widget-upload"
             onClick={() => onSelect(selectedUrls)}
           >
-            Select {fm.selected.length} file{fm.selected.length > 1 ? "s" : ""}
+            {l.selectCount(fm.selected.length)}
           </button>
         )}
       </div>

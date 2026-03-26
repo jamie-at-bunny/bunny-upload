@@ -27,6 +27,10 @@ export {
   formatBytes,
 } from "@bunny.net/upload-core";
 
+// Locale / i18n
+export { defaultLocale, resolveLocale } from "@bunny.net/upload-shared";
+export type { BunnyUploadLocale } from "@bunny.net/upload-shared";
+
 export type {
   FileState,
   FileStatus,

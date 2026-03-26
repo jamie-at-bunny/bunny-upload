@@ -13,3 +13,5 @@ export type {
   PresignResult,
   PresignResponse,
 } from "./types";
+export { defaultLocale, resolveLocale } from "./locale";
+export type { BunnyUploadLocale } from "./locale";

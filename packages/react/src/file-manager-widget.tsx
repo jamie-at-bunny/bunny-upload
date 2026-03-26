@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { StorageEntry, FileManagerAction } from "@bunny.net/file-manager-core";
+import { resolveLocale } from "@bunny.net/upload-shared";
+import type { BunnyUploadLocale } from "@bunny.net/upload-shared";
 import { useFileManager, type UseFileManagerOptions } from "./use-file-manager";
 import { useBunnyUpload } from "./use-bunny-upload";
 import {
@@ -60,6 +62,8 @@ export interface FileManagerWidgetProps extends UseFileManagerOptions {
   label?: string;
   /** View mode (default: "grid") */
   view?: "grid" | "list";
+  /** Override user-facing strings for i18n */
+  locale?: Partial<BunnyUploadLocale>;
 }
 
 const DEFAULT_UPLOAD_ENDPOINT = "/.bunny/upload";
@@ -74,10 +78,13 @@ export function FileManagerWidget({
   renderEntryActions,
   renderActions,
   trigger,
-  label = "Browse files",
+  label,
   view = "grid",
+  locale: localeOverrides,
   ...options
 }: FileManagerWidgetProps) {
+  const l = resolveLocale(localeOverrides);
+  const resolvedLabel = label ?? l.browseFiles;
   const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -233,7 +240,7 @@ export function FileManagerWidget({
         trigger({ open })
       ) : (
         <button type="button" className="bunny-fm__trigger" onClick={open}>
-          {label}
+          {resolvedLabel}
         </button>
       )}
 
@@ -246,18 +253,18 @@ export function FileManagerWidget({
             if (e.target === dialogRef.current) close();
           }}
           aria-modal="true"
-          aria-label={label}
+          aria-label={resolvedLabel}
         >
           <div className="bunny-fm">
             {/* Header */}
             <div className="bunny-fm__header">
-              <span className="bunny-fm__title">{label}</span>
+              <span className="bunny-fm__title">{resolvedLabel}</span>
               <div className="bunny-fm__header-actions">
                 <button
                   type="button"
                   className="bunny-fm__close"
                   onClick={close}
-                  aria-label="Close"
+                  aria-label={l.ariaClose}
                 >
                   &times;
                 </button>
@@ -269,6 +276,7 @@ export function FileManagerWidget({
               breadcrumbs={fm.breadcrumbs}
               currentPath={fm.currentPath}
               onNavigate={fm.navigate}
+              locale={l}
             />
 
             {/* Content */}
@@ -281,6 +289,7 @@ export function FileManagerWidget({
                 error={fm.error}
                 isEmpty={false}
                 onRetry={fm.refresh}
+                locale={l}
               />
 
               {fm.status === "idle" && (
@@ -289,7 +298,7 @@ export function FileManagerWidget({
                     view === "grid" ? "bunny-fm__grid" : "bunny-fm__list"
                   }
                 >
-                  <NewFolderEntry onCreate={fm.createFolder} />
+                  <NewFolderEntry onCreate={fm.createFolder} locale={l} />
                   {visibleEntries.map((entry) => {
                     const isSelected = fm.selected.some(
                       (s) => s.guid === entry.guid
@@ -312,6 +321,7 @@ export function FileManagerWidget({
                             ? () => fm.toggleSelect(entry.guid)
                             : undefined
                         }
+                        locale={l}
                         renderActions={
                           renderEntryActions && hasActions && !entry.isDirectory ? (
                             <div
@@ -336,10 +346,11 @@ export function FileManagerWidget({
                                 const path = entry.isDirectory
                                   ? `${entry.path}${entry.objectName}/`
                                   : `${entry.path}${entry.objectName}`;
-                                if (confirm(`Delete "${entry.objectName}"?`)) {
+                                if (confirm(l.deleteConfirm(entry.objectName))) {
                                   fm.deleteEntry(path);
                                 }
                               }}
+                              locale={l}
                             />
                           )
                         }
@@ -347,7 +358,7 @@ export function FileManagerWidget({
                     );
                   })}
                   {uploadEndpoint && (
-                    <UploadFileEntry endpoint={uploadEndpoint} onUploaded={fm.refresh} />
+                    <UploadFileEntry endpoint={uploadEndpoint} onUploaded={fm.refresh} locale={l} />
                   )}
                 </div>
               )}
@@ -357,7 +368,7 @@ export function FileManagerWidget({
             <div className="bunny-fm__footer">
               <span className="bunny-fm__selection-count">
                 {fm.selected.length > 0
-                  ? `${fm.selected.length} selected`
+                  ? l.selectedCount(fm.selected.length)
                   : ""}
               </span>
 
@@ -379,10 +390,8 @@ export function FileManagerWidget({
                     onClick={handleConfirm}
                   >
                     {allowMultiple
-                      ? `Select ${fm.selected.length} file${
-                          fm.selected.length > 1 ? "s" : ""
-                        }`
-                      : "Select"}
+                      ? l.selectCount(fm.selected.length)
+                      : l.select}
                   </button>
                 )}
               </div>

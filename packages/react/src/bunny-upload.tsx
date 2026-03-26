@@ -1,6 +1,8 @@
 import { useCallback, useRef } from "react";
 import type { FileState, UploadResult } from "@bunny.net/upload-core";
 import { formatBytes } from "@bunny.net/upload-core";
+import { defaultLocale, resolveLocale } from "@bunny.net/upload-shared";
+import type { BunnyUploadLocale } from "@bunny.net/upload-shared";
 import { useBunnyUpload } from "./use-bunny-upload";
 
 export interface BunnyUploadProps {
@@ -15,6 +17,8 @@ export interface BunnyUploadProps {
   autoUpload?: boolean;
   /** Label shown on the button */
   label?: string;
+  /** Override user-facing strings for i18n */
+  locale?: Partial<BunnyUploadLocale>;
 }
 
 export function BunnyUpload({
@@ -27,8 +31,11 @@ export function BunnyUpload({
   onError,
   className,
   autoUpload = true,
-  label = "Choose file",
+  label,
+  locale: localeOverrides,
 }: BunnyUploadProps) {
+  const l = resolveLocale(localeOverrides);
+  const resolvedLabel = label ?? l.chooseFile;
   const { files, addFiles, upload, isUploading } = useBunnyUpload({
     endpoint,
     accept,
@@ -69,7 +76,7 @@ export function BunnyUpload({
         onClick={handleClick}
         disabled={isUploading}
       >
-        {label}
+        {resolvedLabel}
       </button>
       <input
         ref={inputRef}
@@ -88,11 +95,11 @@ export function BunnyUpload({
             </span>
           )}
           {latestFile.status === "complete" && (
-            <span className="bunny-upload-complete">Uploaded</span>
+            <span className="bunny-upload-complete">{l.uploaded}</span>
           )}
           {latestFile.status === "error" && (
             <span className="bunny-upload-error">
-              {latestFile.error ?? "Failed"}
+              {latestFile.error ?? l.failed}
             </span>
           )}
           {latestFile.status === "idle" && (
@@ -103,7 +110,7 @@ export function BunnyUpload({
         </span>
       )}
       {files.length > 1 && (
-        <span className="bunny-upload-count">+{files.length - 1} more</span>
+        <span className="bunny-upload-count">{l.moreCount(files.length - 1)}</span>
       )}
     </div>
   );

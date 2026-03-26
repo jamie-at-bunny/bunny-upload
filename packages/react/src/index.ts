@@ -25,6 +25,10 @@ export type { FileManagerWidgetProps } from "./file-manager-widget";
 export { formatBytes } from "@bunny.net/upload-core";
 export type { FileState, UploadResult } from "@bunny.net/upload-core";
 
+// Re-export locale utilities and types
+export { defaultLocale, resolveLocale } from "@bunny.net/upload-shared";
+export type { BunnyUploadLocale } from "@bunny.net/upload-shared";
+
 // Re-export file manager types from core
 export type {
   StorageEntry,

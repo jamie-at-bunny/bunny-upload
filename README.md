@@ -487,12 +487,104 @@ fm.manager.on("selection-change", (selected) => console.log("Selected:", selecte
 
 Deletes are optimistic — the UI updates immediately and the DELETE requests fire in parallel. If any fail, the file list refreshes to reconcile.
 
+## Internationalization (i18n)
+
+All user-facing strings — labels, status messages, ARIA text — can be customized via a `locale` prop. Pass a partial object to override only what you need; unspecified keys fall back to the English defaults.
+
+### Per-component
+
+```tsx
+<UploadWidget
+  locale={{
+    uploadFiles: "Dateien hochladen",
+    dropOrBrowse: "Dateien hierher ziehen oder klicken",
+    uploading: "Wird hochgeladen...",
+    done: "Fertig",
+  }}
+/>
+```
+
+### Full locale
+
+Define a complete locale object to translate every string:
+
+```tsx
+import { defaultLocale, type BunnyUploadLocale } from "@bunny.net/upload-react";
+
+const de: BunnyUploadLocale = {
+  chooseFile: "Datei auswählen",
+  uploadFiles: "Dateien hochladen",
+  uploadTab: "Hochladen",
+  browseTab: "Durchsuchen",
+  uploading: "Wird hochgeladen...",
+  upload: "Hochladen",
+  uploaded: "Hochgeladen",
+  done: "Fertig",
+  failed: "Fehlgeschlagen",
+  retry: "Erneut versuchen",
+  dropToUpload: "Zum Hochladen ablegen",
+  dropOrBrowse: "Dateien hierher ziehen oder klicken zum Durchsuchen",
+  browseFiles: "Dateien durchsuchen",
+  loading: "Wird geladen\u2026",
+  noFilesFound: "Keine Dateien gefunden",
+  newFolder: "Neuer Ordner",
+  folderNamePrompt: "Ordnername:",
+  uploadFile: "Datei hochladen",
+  uploadingFile: "Wird hochgeladen\u2026",
+  delete: "Löschen",
+  select: "Auswählen",
+  ariaClose: "Schließen",
+  ariaDropzone: "Dateien hierher ziehen oder klicken zum Durchsuchen",
+  ariaFileNavigation: "Dateinavigation",
+  ariaMoreActions: "Weitere Aktionen",
+  ariaCreateNewFolder: "Neuen Ordner erstellen",
+  maxSizeHint: (size, maxFiles) =>
+    `Max. ${size}${maxFiles ? ` · ${maxFiles} Datei${maxFiles > 1 ? "en" : ""}` : ""}`,
+  selectCount: (count) => `${count} Datei${count > 1 ? "en" : ""} auswählen`,
+  selectedCount: (count) => `${count} ausgewählt`,
+  moreCount: (count) => `+${count} weitere`,
+  ariaUploadingFile: (name) => `${name} wird hochgeladen`,
+  ariaRemoveFile: (name) => `${name} entfernen`,
+  ariaSelectEntry: (name) => `${name} auswählen`,
+  deleteConfirm: (name) => `„${name}" löschen?`,
+  deleteCountConfirm: (count) => `${count} Element${count > 1 ? "e" : ""} löschen?`,
+  ariaEntryLabel: (type, name, selected) =>
+    `${type === "folder" ? "Ordner" : "Datei"}: ${name}${selected ? " (ausgewählt)" : ""}`,
+};
+
+<BunnyUpload locale={de} />
+<UploadWidget locale={de} />
+<FileManagerWidget locale={de} />
+```
+
+### Global defaults with `configureBunnyUpload`
+
+```tsx
+const { BunnyUpload } = configureBunnyUpload({
+  endpoint: "/api/upload",
+  locale: {
+    chooseFile: "Datei auswählen",
+    uploaded: "Hochgeladen",
+  },
+});
+
+// Every instance inherits the locale — per-component overrides still work
+<BunnyUpload />
+```
+
+Dynamic strings use functions so pluralization works across languages (e.g. `selectCount`, `deleteConfirm`, `ariaEntryLabel`).
+
+The `locale` prop is accepted by `BunnyUpload`, `UploadWidget`, `UploadFileList`, `FileManager`, `FileManagerWidget`, and `FileBrowser`. The `defaultLocale` object and `BunnyUploadLocale` type are exported from `@bunny.net/upload-react` and `@bunny.net/upload`.
+
+[Full example →](./examples/nextjs-i18n)
+
 ## Packages
 
 | Package | Description |
 |---|---|
 | [`@bunny.net/upload`](./packages/upload) | Meta-package — re-exports both client engine and server handler |
 | [`@bunny.net/upload-core`](./packages/core) | Framework-agnostic upload engine, `createDropzone`, and optional stylesheet |
+| [`@bunny.net/upload-shared`](./packages/upload-shared) | Shared types, utilities, and i18n locale definitions |
 | [`@bunny.net/upload-handler`](./packages/handler) | Server-side proxy to Bunny Storage |
 | [`@bunny.net/file-manager-core`](./packages/file-manager-core) | Framework-agnostic file manager engine |
 | [`@bunny.net/file-manager-handler`](./packages/file-manager-handler) | Server-side handler for browsing, deleting, and importing files |
