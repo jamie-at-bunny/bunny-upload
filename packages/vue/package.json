@@ -31,7 +31,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@bunny.net/upload-core": "workspace:*"
+    "@bunny.net/upload-core": "0.0.1"
   },
   "peerDependencies": {
     "vue": "^3.3.0"

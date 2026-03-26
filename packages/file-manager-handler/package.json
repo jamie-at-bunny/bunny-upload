@@ -30,9 +30,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@bunny.net/file-manager-core": "workspace:*",
+    "@bunny.net/file-manager-core": "0.0.1",
     "@bunny.net/storage-sdk": "^0.3.1",
-    "@bunny.net/upload-shared": "workspace:*"
+    "@bunny.net/upload-shared": "0.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

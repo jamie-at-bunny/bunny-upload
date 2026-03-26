@@ -31,7 +31,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@bunny.net/upload-handler": "workspace:*"
+    "@bunny.net/upload-handler": "0.0.1"
   },
   "peerDependencies": {
     "next": ">=14.0.0"
