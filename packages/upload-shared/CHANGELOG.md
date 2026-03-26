@@ -1,5 +1,11 @@
 # @bunny.net/upload-shared
 
+## 0.0.2
+
+### Patch Changes
+
+- 662008e: Fix unresolved workspace dependencies that made published packages uninstallable
+
 ## 0.0.1
 
 ### Patch Changes

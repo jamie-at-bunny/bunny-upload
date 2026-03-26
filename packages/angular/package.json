@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "main": "./dist/fesm2022/bunny.net-upload-angular.mjs",
   "types": "./dist/index.d.ts",
@@ -20,14 +20,14 @@
   "peerDependencies": {
     "@angular/core": ">=17.0.0",
     "@angular/common": ">=17.0.0",
-    "@bunny.net/upload-core": "0.0.1"
+    "@bunny.net/upload-core": "0.0.2"
   },
   "devDependencies": {
     "@angular/common": "^19.0.0",
     "@angular/compiler": "^19.0.0",
     "@angular/compiler-cli": "^19.0.0",
     "@angular/core": "^19.0.0",
-    "@bunny.net/upload-core": "0.0.1",
+    "@bunny.net/upload-core": "0.0.2",
     "ng-packagr": "^19.0.0",
     "rxjs": "^7.8.0",
     "typescript": "~5.8.0",
