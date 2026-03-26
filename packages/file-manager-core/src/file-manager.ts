@@ -12,7 +12,7 @@ import type {
 const DEFAULT_ENDPOINT = "/.bunny/files";
 
 export class FileManager {
-  private emitter = new Emitter();
+  private emitter = new Emitter<FileManagerEventMap>();
   private state: FileManagerState;
   private endpoint: string;
   private cdnBase: string | undefined;

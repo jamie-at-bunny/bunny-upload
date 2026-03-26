@@ -3,14 +3,8 @@ import {
   type FileManagerHandlerOptions,
   type StorageEntry,
 } from "./types";
+import { jsonResponse } from "@bunny.net/upload-shared";
 import * as BunnyStorage from "@bunny.net/storage-sdk";
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 function getStorageHost(region: string): string {
   if (region === "de") return "https://storage.bunnycdn.com";

@@ -4,6 +4,7 @@ export { regions, file } from "@bunny.net/storage-sdk";
 export type {
   HandlerOptions,
   HandlerRestrictions,
+  Restrictions,
   HandlerResponse,
   FileInfo,
   UploadResult,

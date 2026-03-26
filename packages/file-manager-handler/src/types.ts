@@ -1,6 +1,8 @@
 import type { regions } from "@bunny.net/storage-sdk";
+import { HandlerError } from "@bunny.net/upload-shared";
 
 export type { StorageEntry } from "@bunny.net/file-manager-core";
+export { HandlerError } from "@bunny.net/upload-shared";
 
 export interface FileManagerHandlerOptions {
   storageZone?: string;
@@ -14,12 +16,4 @@ export interface FileManagerHandlerOptions {
   onBeforeImport?: (url: string, path: string, req: Request) => Promise<void> | void;
 }
 
-export class FileManagerError extends Error {
-  readonly statusCode: number;
-
-  constructor(message: string, statusCode = 400) {
-    super(message);
-    this.name = "FileManagerError";
-    this.statusCode = statusCode;
-  }
-}
+export class FileManagerError extends HandlerError {}

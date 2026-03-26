@@ -16,7 +16,7 @@ const INITIAL_BACKOFF_MS = 1000;
 
 export class Uploader {
   private files = new Map<string, FileState>();
-  private emitter = new Emitter();
+  private emitter = new Emitter<EventMap>();
   private endpoint: string;
   private restrictions: Restrictions;
   private presigned: boolean;

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { StorageEntry, FileManagerAction } from "@bunny.net/file-manager-core";
+import { formatBytes } from "@bunny.net/upload-shared";
 
 // ── Image helpers ──────────────────────────────────────────────
 
@@ -13,14 +14,6 @@ function getExtension(name: string): string {
 
 export function isImageEntry(entry: StorageEntry): boolean {
   return !entry.isDirectory && IMAGE_EXTENSIONS.has(getExtension(entry.objectName));
-}
-
-export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
 }
 
 export function formatDate(dateString: string): string {
@@ -199,7 +192,7 @@ export function EntryCard({
 
       {!entry.isDirectory && (
         <span className="bunny-fm__entry-meta">
-          {formatFileSize(entry.length)}
+          {formatBytes(entry.length)}
         </span>
       )}
       <span className="bunny-fm__entry-date">

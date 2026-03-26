@@ -1,8 +1,16 @@
-export interface HandlerRestrictions {
-  maxFileSize?: string | number;
-  allowedTypes?: string[];
-  maxFiles?: number;
-}
+export type {
+  Restrictions,
+  UploadResult,
+  PresignResult,
+  PresignResponse,
+} from "@bunny.net/upload-shared";
+export { HandlerError } from "@bunny.net/upload-shared";
+
+import { HandlerError } from "@bunny.net/upload-shared";
+import type { Restrictions, UploadResult } from "@bunny.net/upload-shared";
+
+/** @deprecated Use `Restrictions` from `@bunny.net/upload-shared` instead. */
+export type HandlerRestrictions = Restrictions;
 
 export interface FileInfo {
   name: string;
@@ -10,27 +18,9 @@ export interface FileInfo {
   type: string;
 }
 
-export interface UploadResult {
-  name: string;
-  path: string;
-  size: number;
-  url: string;
-}
-
 export interface PresignRequest {
   presign: true;
   files: FileInfo[];
-}
-
-export interface PresignResult {
-  name: string;
-  path: string;
-  url: string;
-  presignedUrl: string;
-}
-
-export interface PresignResponse {
-  files: PresignResult[];
 }
 
 export interface CompleteRequest {
@@ -45,7 +35,7 @@ export interface HandlerOptions {
   storagePassword?: string;
   cdnBase?: string;
   storageRegion?: regions.StorageRegion;
-  restrictions?: HandlerRestrictions;
+  restrictions?: Restrictions;
   onBeforeUpload?: (file: FileInfo, req: Request) => Promise<void> | void;
   getPath?: (file: FileInfo, req: Request) => string;
   onAfterUpload?: (result: UploadResult, req: Request) => Promise<void> | void;
@@ -55,12 +45,4 @@ export interface HandlerResponse {
   files: UploadResult[];
 }
 
-export class UploadError extends Error {
-  readonly statusCode: number;
-
-  constructor(message: string, statusCode = 400) {
-    super(message);
-    this.name = "UploadError";
-    this.statusCode = statusCode;
-  }
-}
+export class UploadError extends HandlerError {}

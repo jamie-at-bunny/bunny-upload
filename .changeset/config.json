@@ -6,6 +6,7 @@
   "linked": [
     [
       "@bunny.net/upload",
+      "@bunny.net/upload-shared",
       "@bunny.net/upload-core",
       "@bunny.net/upload-handler",
       "@bunny.net/upload-react",
@@ -13,9 +14,7 @@
       "@bunny.net/upload-next",
       "@bunny.net/upload-vue",
       "@bunny.net/upload-nuxt",
-      "@bunny.net/upload-solid"
-    ],
-    [
+      "@bunny.net/upload-solid",
       "@bunny.net/file-manager-core",
       "@bunny.net/file-manager-handler"
     ]

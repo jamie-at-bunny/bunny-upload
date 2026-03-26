@@ -282,16 +282,45 @@ No framework needed. Use `createDropzone` to attach drag-and-drop to any element
 
 </details>
 
-## Components
+## Styling
 
-Each framework package provides three levels of control:
+An optional stylesheet is included with the bunny.net brand theme. It styles all built-in components (`BunnyUpload`, `UploadWidget`, `FileBrowser`, `FileManager`, `FileManagerWidget`) and supports light and dark mode automatically via `prefers-color-scheme`.
 
-### Drop-in component
+```ts
+import "@bunny.net/upload-core/styles.css";
+```
 
-Everything included — drag-and-drop zone, file list, progress bars, error states, retry.
+Components are fully functional without the stylesheet. All elements use BEM-style class names (`bunny-upload-*`, `bunny-widget-*`, `bunny-fm__*`) that you can target with your own CSS.
+
+## Upload Components
+
+Each framework package provides four levels of control for uploads:
+
+### Inline button
+
+A button with a hidden file input. Click, pick files, see status inline.
 
 ```tsx
-<BunnyUpload accept={["image/*"]} maxSize="10mb" maxFiles={5} onComplete={(files) => console.log(files)} />
+<BunnyUpload accept={["image/*"]} maxSize="10mb" onComplete={(files) => console.log(files)} />
+```
+
+### Upload widget
+
+A modal dialog with drag-and-drop, file list with progress bars, and upload controls.
+
+```tsx
+<UploadWidget accept={["image/*"]} maxSize="10mb" maxFiles={5} onComplete={(files) => console.log(files)} />
+```
+
+Add `withFileManager` to include a "Browse" tab for selecting existing files alongside uploading new ones:
+
+```tsx
+<UploadWidget
+  accept={["image/*"]}
+  maxSize="10mb"
+  withFileManager
+  onComplete={(files) => console.log(files)}
+/>
 ```
 
 ### Custom dropzone
@@ -337,77 +366,44 @@ export const { GET, POST, DELETE } = serveBunnyFileManager(
 );
 ```
 
-### Widget
+### File browser (read-only)
 
-A ready-to-use dialog with grid view, breadcrumbs, and file selection. Users pick files and you get the CDN URLs back.
-
-```tsx
-import { FileManagerWidget } from "@bunny.net/upload-react";
-
-<FileManagerWidget
-  accept={["jpg", "png", "webp"]}
-  onSelect={(entries, urls) => console.log("Selected:", urls)}
-  trigger={({ open }) => <button onClick={open}>Pick image</button>}
-/>
-```
-
-With `allowMultiple={false}`, clicking a file immediately fires `onSelect` and closes the dialog — no confirm step:
+A read-only view of your storage zone. Navigate directories, see thumbnails. No selection or actions.
 
 ```tsx
-<FileManagerWidget
-  allowMultiple={false}
-  onSelect={(entries, urls) => setImage(urls[0])}
-/>
+import { FileBrowser } from "@bunny.net/upload-react";
+
+<FileBrowser />
 ```
 
-Use the `value` prop to pre-select files when the dialog opens (e.g. to restore a previous selection):
+### Embedded file manager
 
-```tsx
-const [selected, setSelected] = useState<string[]>([]);
-
-<FileManagerWidget
-  value={selected}
-  onSelect={(entries, urls) => {
-    setSelected(entries.map(e => e.path + e.objectName));
-  }}
-/>
-```
-
-You can provide custom actions in the footer when files are selected, and per-entry actions on each item in the grid:
-
-```tsx
-import { copyUrlAction, downloadAction } from "@bunny.net/file-manager-core/actions";
-
-// Footer actions (collective) — shown when files are selected
-<FileManagerWidget
-  renderActions={({ selected, urls, actions, executeAction }) => (
-    <>
-      <button onClick={() => navigator.clipboard.writeText(urls[0])}>Copy URL</button>
-      <button onClick={() => insertImage(urls[0])}>Insert</button>
-    </>
-  )}
-/>
-
-// Per-entry actions — rendered on each item in the grid/list
-<FileManagerWidget
-  actions={[copyUrlAction, downloadAction]}
-  renderEntryActions={({ entry, url, actions, executeAction }) => (
-    <>
-      {actions.map(a => (
-        <button key={a.id} onClick={() => executeAction(a.id)}>{a.label}</button>
-      ))}
-    </>
-  )}
-/>
-```
-
-### Render props
-
-Full control over the UI — the component provides all state and methods.
+Full-featured inline component with selection, actions, uploads, and drag-and-drop. Renders directly on the page, not in a dialog.
 
 ```tsx
 import { FileManager } from "@bunny.net/upload-react";
+import { copyUrlAction, downloadAction } from "@bunny.net/file-manager-core/actions";
 
+<FileManager
+  withUploads
+  withActions={[copyUrlAction, downloadAction]}
+/>
+```
+
+`withUploads` enables file uploading (defaults to `/.bunny/upload`, or pass a string for a custom endpoint). Files are uploaded to the current directory. The upload endpoint receives `?dir=/current/path/` so your server's `getPath` can place files in the right folder:
+
+```ts
+getPath: (file, req) => {
+  const dir = new URL(req.url).searchParams.get("dir") || "/";
+  return `${dir.replace(/\/$/, "")}/${file.name}`;
+}
+```
+
+`withActions` registers actions that appear on each file entry (primary action as a button, overflow in a dropdown menu). Every entry also gets a "Delete" action in the dropdown automatically.
+
+`FileManager` also supports render-prop children for fully custom UI:
+
+```tsx
 <FileManager>
   {({ entries, selected, selectedUrls, navigate, toggleSelect, breadcrumbs }) => (
     <div>
@@ -420,14 +416,46 @@ import { FileManager } from "@bunny.net/upload-react";
           {entry.objectName}
         </div>
       ))}
-      {selected.length > 0 && (
-        <button onClick={() => onInsert(selectedUrls)}>
-          Use {selected.length} file(s)
-        </button>
-      )}
     </div>
   )}
 </FileManager>
+```
+
+### File manager widget (dialog)
+
+A dialog with grid view, breadcrumbs, and file selection. Supports uploads, actions, single/multi-select, and preselection.
+
+```tsx
+import { FileManagerWidget } from "@bunny.net/upload-react";
+
+<FileManagerWidget
+  withUploads
+  withActions={[copyUrlAction, downloadAction]}
+  onSelect={(entries, urls) => console.log("Selected:", urls)}
+  trigger={({ open }) => <button onClick={open}>Browse files</button>}
+/>
+```
+
+With `allowMultiple={false}`, clicking a file immediately fires `onSelect` and closes the dialog:
+
+```tsx
+<FileManagerWidget
+  allowMultiple={false}
+  onSelect={(entries, urls) => setImage(urls[0])}
+/>
+```
+
+Use the `value` prop to pre-select files when the dialog opens:
+
+```tsx
+const [selected, setSelected] = useState<string[]>([]);
+
+<FileManagerWidget
+  value={selected}
+  onSelect={(entries, urls) => {
+    setSelected(entries.map(e => e.path + e.objectName));
+  }}
+/>
 ```
 
 ### Headless hook
@@ -444,14 +472,27 @@ const {
 } = useFileManager();
 ```
 
-See the [React package docs](./packages/react) for full API reference and the [Next.js example](./examples/nextjs) for a working demo of all three approaches.
+### Events
+
+The file manager emits events you can listen to on the underlying manager instance:
+
+```tsx
+const fm = useFileManager();
+
+fm.manager.on("delete-start", (paths) => console.log("Deleting:", paths));
+fm.manager.on("delete-complete", (paths) => console.log("Deleted:", paths));
+fm.manager.on("navigate", (path) => console.log("Navigated to:", path));
+fm.manager.on("selection-change", (selected) => console.log("Selected:", selected));
+```
+
+Deletes are optimistic — the UI updates immediately and the DELETE requests fire in parallel. If any fail, the file list refreshes to reconcile.
 
 ## Packages
 
 | Package | Description |
 |---|---|
 | [`@bunny.net/upload`](./packages/upload) | Meta-package — re-exports both client engine and server handler |
-| [`@bunny.net/upload-core`](./packages/core) | Framework-agnostic upload engine and `createDropzone` |
+| [`@bunny.net/upload-core`](./packages/core) | Framework-agnostic upload engine, `createDropzone`, and optional stylesheet |
 | [`@bunny.net/upload-handler`](./packages/handler) | Server-side proxy to Bunny Storage |
 | [`@bunny.net/file-manager-core`](./packages/file-manager-core) | Framework-agnostic file manager engine |
 | [`@bunny.net/file-manager-handler`](./packages/file-manager-handler) | Server-side handler for browsing, deleting, and importing files |
@@ -541,6 +582,8 @@ createBunnyUploadHandler({
   },
 });
 ```
+
+This gates both proxy uploads and presigned URL generation. No signed URL gets created unless your auth check passes.
 
 ## Configuration
 

@@ -1,3 +1,12 @@
+export type {
+  Restrictions,
+  UploadResult,
+  PresignResult,
+  PresignResponse,
+} from "@bunny.net/upload-shared";
+
+import type { Restrictions, UploadResult } from "@bunny.net/upload-shared";
+
 export type FileStatus = "idle" | "uploading" | "complete" | "error";
 
 export interface FileState {
@@ -12,35 +21,11 @@ export interface FileState {
   error?: string;
 }
 
-export interface UploadResult {
-  name: string;
-  path: string;
-  size: number;
-  url: string;
-}
-
 export interface UploadResponse {
   files: UploadResult[];
 }
 
-export interface Restrictions {
-  maxFileSize?: string | number;
-  allowedTypes?: string[];
-  maxFiles?: number;
-}
-
 export const DEFAULT_ENDPOINT = "/.bunny/upload";
-
-export interface PresignResult {
-  name: string;
-  path: string;
-  url: string;
-  presignedUrl: string;
-}
-
-export interface PresignResponse {
-  files: PresignResult[];
-}
 
 export interface UploaderOptions {
   endpoint?: string;

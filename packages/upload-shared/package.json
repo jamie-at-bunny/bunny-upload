@@ -1,5 +1,5 @@
 {
-  "name": "@bunny.net/file-manager-core",
+  "name": "@bunny.net/upload-shared",
   "publishConfig": { "access": "public" },
   "version": "0.0.0",
   "type": "module",
@@ -16,16 +16,6 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    },
-    "./actions": {
-      "import": {
-        "types": "./dist/actions.d.ts",
-        "default": "./dist/actions.js"
-      },
-      "require": {
-        "types": "./dist/actions.d.cts",
-        "default": "./dist/actions.cjs"
-      }
     }
   },
   "files": ["dist"],
@@ -34,9 +24,6 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
-  },
-  "dependencies": {
-    "@bunny.net/upload-shared": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

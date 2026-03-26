@@ -260,6 +260,9 @@
     "packages/core": {
       "name": "@bunny.net/upload-core",
       "version": "0.0.0",
+      "dependencies": {
+        "@bunny.net/upload-shared": "workspace:*",
+      },
       "devDependencies": {
         "tsup": "^8.0.0",
         "typescript": "^5.5.0",
@@ -269,6 +272,9 @@
     "packages/file-manager-core": {
       "name": "@bunny.net/file-manager-core",
       "version": "0.0.0",
+      "dependencies": {
+        "@bunny.net/upload-shared": "workspace:*",
+      },
       "devDependencies": {
         "tsup": "^8.0.0",
         "typescript": "^5.5.0",
@@ -280,6 +286,7 @@
       "dependencies": {
         "@bunny.net/file-manager-core": "workspace:*",
         "@bunny.net/storage-sdk": "^0.3.1",
+        "@bunny.net/upload-shared": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "^22.0.0",
@@ -294,6 +301,7 @@
         "@aws-sdk/client-s3": "^3.0.0",
         "@aws-sdk/s3-request-presigner": "^3.0.0",
         "@bunny.net/storage-sdk": "^0.3.1",
+        "@bunny.net/upload-shared": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "^22.0.0",
@@ -340,6 +348,7 @@
       "dependencies": {
         "@bunny.net/file-manager-core": "workspace:*",
         "@bunny.net/upload-core": "workspace:*",
+        "@bunny.net/upload-shared": "workspace:*",
       },
       "devDependencies": {
         "@types/react": "^19.0.0",
@@ -378,6 +387,14 @@
         "@bunny.net/upload-core": "workspace:*",
         "@bunny.net/upload-handler": "workspace:*",
       },
+      "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.5.0",
+      },
+    },
+    "packages/upload-shared": {
+      "name": "@bunny.net/upload-shared",
+      "version": "0.0.0",
       "devDependencies": {
         "tsup": "^8.0.0",
         "typescript": "^5.5.0",
@@ -596,6 +613,8 @@
     "@bunny.net/upload-nuxt": ["@bunny.net/upload-nuxt@workspace:packages/nuxt"],
 
     "@bunny.net/upload-react": ["@bunny.net/upload-react@workspace:packages/react"],
+
+    "@bunny.net/upload-shared": ["@bunny.net/upload-shared@workspace:packages/upload-shared"],
 
     "@bunny.net/upload-solid": ["@bunny.net/upload-solid@workspace:packages/solid"],
 

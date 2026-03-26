@@ -9,35 +9,10 @@ import {
   type PresignResponse,
   type CompleteRequest,
 } from "./types";
+import { parseFileSize, matchesMimeType, jsonResponse } from "@bunny.net/upload-shared";
 import * as BunnyStorage from "@bunny.net/storage-sdk";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
-function parseFileSize(size: string | number): number {
-  if (typeof size === "number") return size;
-  const units: Record<string, number> = {
-    b: 1,
-    kb: 1024,
-    mb: 1024 * 1024,
-    gb: 1024 * 1024 * 1024,
-  };
-  const match = size.toLowerCase().trim().match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb)$/);
-  if (!match) throw new Error(`Invalid file size: "${size}"`);
-  return Math.floor(parseFloat(match[1]) * units[match[2]]);
-}
-
-function matchesMimeType(fileType: string, pattern: string): boolean {
-  if (pattern === "*" || pattern === "*/*") return true;
-  if (pattern.endsWith("/*")) return fileType.startsWith(pattern.slice(0, -2) + "/");
-  return fileType === pattern;
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 const S3_REGIONS: Record<string, string> = {
   de: "de",
