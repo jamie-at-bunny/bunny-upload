@@ -35,17 +35,8 @@
     "example-solidstart",
     "example-tanstack-start",
     "example-vanilla",
-<<<<<<< Updated upstream
-    "example-vue",
-    "example-nextjs-i18n"
-=======
-<<<<<<< Updated upstream
-    "example-vue"
-=======
     "example-vue",
     "example-nextjs-i18n",
     "example-s3-presigned"
->>>>>>> Stashed changes
->>>>>>> Stashed changes
   ]
 }
