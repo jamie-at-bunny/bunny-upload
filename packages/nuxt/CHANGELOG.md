@@ -1,5 +1,13 @@
 # @bunny.net/upload-nuxt
 
+## 0.0.2
+
+### Patch Changes
+
+- 662008e: Fix unresolved workspace dependencies that made published packages uninstallable
+- Updated dependencies [662008e]
+  - @bunny.net/upload-handler@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes

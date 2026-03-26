@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -34,7 +34,7 @@
     "@aws-sdk/client-s3": "^3.0.0",
     "@aws-sdk/s3-request-presigner": "^3.0.0",
     "@bunny.net/storage-sdk": "^0.3.1",
-    "@bunny.net/upload-shared": "0.0.1"
+    "@bunny.net/upload-shared": "0.0.2"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
