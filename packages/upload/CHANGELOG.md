@@ -1,5 +1,12 @@
 # @bunny.net/upload
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [92c965d]
+  - @bunny.net/upload-handler@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes
