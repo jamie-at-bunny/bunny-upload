@@ -35,6 +35,7 @@ export interface HandlerOptions {
   storagePassword?: string;
   cdnBase?: string;
   storageRegion?: regions.StorageRegion;
+  endpointUrl?: string;
   restrictions?: Restrictions;
   onBeforeUpload?: (file: FileInfo, req: Request) => Promise<void> | void;
   getPath?: (file: FileInfo, req: Request) => string;

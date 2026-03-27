@@ -62,6 +62,7 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
   const storagePassword = options.storagePassword ?? process.env.BUNNY_STORAGE_PASSWORD;
   const cdnBase = options.cdnBase ?? process.env.BUNNY_CDN_BASE;
   const storageRegion = options.storageRegion ?? process.env.BUNNY_STORAGE_REGION;
+  const endpointUrl = options.endpointUrl ?? process.env.BUNNY_ENDPOINT_URL;
   const { restrictions, onBeforeUpload, getPath, onAfterUpload } = options;
 
   if (!storageZone) {
@@ -83,7 +84,7 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
   function getS3Client(): S3Client {
     if (!s3Client) {
       const regionCode = (storageRegion ?? "de") as string;
-      const endpoint = buildS3Endpoint(regionCode);
+      const endpoint = endpointUrl ?? buildS3Endpoint(regionCode);
       s3Client = new S3Client({
         endpoint,
         region: regionCode,
