@@ -1,5 +1,11 @@
 # @bunny.net/upload-handler
 
+## 0.0.3
+
+### Patch Changes
+
+- 92c965d: Add `endpointUrl` option and `BUNNY_ENDPOINT_URL` env var support to use custom S3-compatible endpoints for presigned uploads
+
 ## 0.0.2
 
 ### Patch Changes
