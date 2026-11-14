@@ -37,6 +37,7 @@
     "example-vanilla",
     "example-vue",
     "example-nextjs-i18n",
-    "example-s3-presigned"
+    "example-s3-presigned",
+    "example-next-simple"
   ]
 }

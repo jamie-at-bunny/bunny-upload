@@ -1,194 +1,135 @@
 # @bunny.net/upload
 
-Drop-in file uploads for [Bunny Storage](https://bunny.net/storage). This is the main package — it re-exports everything from both the client engine ([`@bunny.net/upload-core`](../core)) and the server handler ([`@bunny.net/upload-handler`](../handler)), so one install gives you everything you need.
-
-## Install
+File uploads to [Bunny Storage](https://bunny.net/storage) in two pieces: a server handler you mount on one route, and a client (or React button) that talks to it.
 
 ```bash
 npm install @bunny.net/upload
 ```
 
-## Environment variables
-
-The server handler reads credentials from environment variables automatically:
-
 ```env
 BUNNY_STORAGE_ZONE=my-zone
-BUNNY_STORAGE_PASSWORD=my-password
+BUNNY_STORAGE_PASSWORD=storage-zone-password
 BUNNY_CDN_BASE=https://my-zone.b-cdn.net
-BUNNY_STORAGE_REGION=de              # optional, defaults to Falkenstein (de)
+BUNNY_STORAGE_REGION=de          # optional: de, uk, ny, la, sg, se, br, jh, syd
 ```
 
-## Quickstart
+## Server
 
-Every setup needs two things: a **server handler** (proxies uploads to Bunny Storage) and a **client** (handles the UI).
+`createUploadHandler()` returns `(request: Request) => Promise<Response>`. Mount it on `POST`.
 
-### Server
-
-The handler works with any framework that supports standard `Request`/`Response`:
+**Next.js** (`app/api/upload/route.ts`)
 
 ```ts
-import { createBunnyUploadHandler } from "@bunny.net/upload";
+import { createUploadHandler } from "@bunny.net/upload/server";
 
-const handler = createBunnyUploadHandler();
-
-// handler is (request: Request) => Promise<Response>
-```
-
-### Client
-
-Use `createUploader` for a framework-agnostic upload engine, or `createDropzone` to attach drag-and-drop to any element:
-
-```ts
-import { createUploader } from "@bunny.net/upload";
-
-const uploader = createUploader();
-
-uploader.on("complete", (results) => console.log(results));
-uploader.addFiles(fileInput.files);
-await uploader.upload();
-```
-
-```ts
-import { createDropzone } from "@bunny.net/upload";
-
-const dropzone = createDropzone(document.getElementById("dropzone"), {
-  onComplete: (files) => console.log("Uploaded:", files),
+export const POST = createUploadHandler({
+  maxFileSize: "4mb",
+  allowedTypes: ["image/*"],
 });
 ```
 
-## Server options
-
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `storageZone` | `string` | `BUNNY_STORAGE_ZONE` env var | Bunny Storage zone name |
-| `storagePassword` | `string` | `BUNNY_STORAGE_PASSWORD` env var | Storage zone password |
-| `cdnBase` | `string` | `BUNNY_CDN_BASE` env var | CDN base URL for generating file URLs |
-| `storageRegion` | `StorageRegion` | `Falkenstein` | Storage region |
-| `restrictions` | `HandlerRestrictions` | — | Server-side file validation |
-| `getPath` | `(file, req) => string` | `/${file.name}` | Control where files are stored |
-| `onBeforeUpload` | `(file, req) => void` | — | Validate before upload (throw to reject) |
-| `onAfterUpload` | `(result, req) => void` | — | Run after successful upload |
-
-### `getPath`
-
-Controls where the file lands in your storage zone. The path becomes the key, and the CDN URL is `${cdnBase}${path}`.
+**Hono**
 
 ```ts
-// Flat with timestamp
-getPath: (file) => `/uploads/${Date.now()}-${file.name}`
-
-// Per-user folders
-getPath: async (file, req) => {
-  const session = await getSession(req);
-  return `/users/${session.userId}/${file.name}`;
-}
-
-// By content type
-getPath: (file) => `/${file.type.split("/")[0]}/${Date.now()}-${file.name}`
+const upload = createUploadHandler();
+app.post("/api/upload", (c) => upload(c.req.raw));
 ```
 
-## Auth
-
-Since uploads go to your own server, the browser sends cookies automatically. Use `onBeforeUpload` to validate the session:
+**React Router / Remix**
 
 ```ts
-import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload";
+const upload = createUploadHandler();
+export const action = ({ request }: ActionFunctionArgs) => upload(request);
+```
 
-createBunnyUploadHandler({
-  onBeforeUpload: async (_file, req) => {
-    const cookie = req.headers.get("cookie");
-    const session = await getSession(cookie);
-    if (!session) throw new UploadError("Unauthorized", 401);
-  },
+**SvelteKit** (`src/routes/api/upload/+server.ts`)
+
+```ts
+const upload = createUploadHandler();
+export const POST = ({ request }) => upload(request);
+```
+
+**Nuxt** (`server/api/upload.post.ts`)
+
+```ts
+const upload = createUploadHandler();
+export default defineEventHandler((event) => upload(toWebRequest(event)));
+```
+
+**Bun / Deno / Bunny Edge Scripts**
+
+```ts
+const upload = createUploadHandler();
+Bun.serve({ fetch: (req) => upload(req) });
+```
+
+### Options
+
+| Option | Default | |
+| --- | --- | --- |
+| `maxFileSize` | none | Bytes or `"10mb"`, `"500kb"`, `"1.5gb"` |
+| `allowedTypes` | any | MIME patterns, e.g. `["image/*", "application/pdf"]` |
+| `authorize` | allow | `({ file, request }) => boolean`. Return `false` for a 403, or throw `UploadError(message, status)` |
+| `path` | `uploads/<uuid>-<name>` | `({ file, request }) => string`. Paths containing `..` are rejected |
+| `onComplete` | none | `({ file, request }) => void`. Runs once the file is in storage, e.g. to save it to your database |
+| `strategy` | `"proxy"` | `"proxy"` or `"presigned"`. See below |
+| `storageZone`, `storagePassword`, `cdnBase`, `region` | env | Override the env vars |
+| `secret` | `BUNNY_UPLOAD_SECRET`, falling back to the storage password | Signs upload tokens |
+| `tokenTtl` | `3600` | Seconds a client has to finish an upload |
+| `endpointUrl` | `BUNNY_ENDPOINT_URL` | Custom S3 endpoint for presigned uploads |
+
+Options are validated with Zod when the handler is created, so a missing env var or a bad `maxFileSize` fails at startup with a readable message.
+
+### Proxy vs presigned
+
+- **`proxy`** (default): the file goes through your server, which streams it to Bunny Storage. Works in every region. Serverless platforms cap request bodies (4.5MB on Vercel), so keep `maxFileSize` under that or switch strategies.
+- **`presigned`**: the browser uploads straight to Bunny's S3-compatible API with a URL that signs the exact size and content type. Needs a storage zone with S3 enabled in `de`, `ny` or `sg`. After the upload, the handler checks the object exists at the right size before calling `onComplete`.
+
+The client works with either strategy, so you can switch without changing any frontend code.
+
+## React
+
+```tsx
+"use client";
+import { UploadButton } from "@bunny.net/upload/react";
+
+<UploadButton
+  accept="image/*"
+  onComplete={(files) => console.log(files[0].url)}
+  onError={(err) => alert(err.message)}
+/>
+```
+
+The button is unstyled. Pass `className`, and style states with `[data-status="uploading"]`, `"success"` or `"error"`. `children` can be a function of `{ status, progress, results, error }`.
+
+For your own UI, use the hook:
+
+```tsx
+const { upload, status, progress, results, error, abort, reset } = useUpload({ endpoint: "/api/upload" });
+
+<input type="file" onChange={(e) => upload(e.target.files!)} />
+{status === "uploading" && <progress value={progress} max={100} />}
+```
+
+## Any other framework
+
+```ts
+import { upload } from "@bunny.net/upload/client";
+
+const result = await upload(file, {
+  endpoint: "/api/upload",
+  onProgress: ({ percent }) => console.log(percent),
+  signal: controller.signal,
 });
+// { name, path, size, type, url }
 ```
 
-## Client options
+Network errors and 5xx responses are retried twice. Validation and auth errors (4xx) fail immediately, with the server's message on `error.message` and the status code on `error.status`.
 
-### `createUploader(options?)`
+## How it works
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `endpoint` | `string` | `"/.bunny/upload"` | Server endpoint to upload to |
-| `restrictions.maxFileSize` | `string \| number` | — | Max file size (e.g. `"10mb"`, `1048576`) |
-| `restrictions.allowedTypes` | `string[]` | — | Allowed MIME types (supports globs like `"image/*"`) |
-| `restrictions.maxFiles` | `number` | — | Max number of files |
+1. The client POSTs `{ action: "init", file: { name, size, type } }`. The server validates it, runs `authorize` and `path`, and returns a signed, short-lived token.
+2. The client sends the bytes, either to your handler with the token in the `x-bunny-upload-token` header (proxy) or to the presigned URL.
+3. The server verifies the token and checks the byte count. For presigned uploads the client then POSTs `{ action: "complete", token }` and the server HEADs the object before running `onComplete`.
 
-### `Uploader`
-
-| Method | Description |
-|---|---|
-| `addFiles(files)` | Add files from a `FileList` or `File[]`. Returns added `FileState[]`. |
-| `removeFile(id)` | Remove a file by ID |
-| `upload()` | Upload all pending files. Returns `Promise<UploadResult[]>`. |
-| `reset()` | Clear all files |
-| `getFiles()` | Get current file states |
-| `on(event, fn)` | Subscribe to an event. Returns an unsubscribe function. |
-
-### Events
-
-| Event | Payload | Description |
-|---|---|---|
-| `state-change` | `FileState[]` | Any file state changed |
-| `complete` | `UploadResult[]` | All uploads finished |
-| `error` | `Error, FileState?` | An upload failed |
-| `file-added` | `FileState` | A file was added |
-| `file-removed` | `FileState` | A file was removed |
-| `upload-progress` | `FileState` | Upload progress updated |
-
-### Utilities
-
-```ts
-import { parseFileSize, matchesMimeType, formatBytes } from "@bunny.net/upload";
-
-parseFileSize("10mb"); // 10485760
-matchesMimeType("image/png", "image/*"); // true
-formatBytes(10485760); // "10 MB"
-```
-
-## Storage regions
-
-```ts
-import { regions } from "@bunny.net/upload";
-
-createBunnyUploadHandler({
-  storageRegion: regions.StorageRegion.NewYork,
-});
-```
-
-Available regions: `Falkenstein`, `NewYork`, `LosAngeles`, `Singapore`, `Sydney`, `London`, `Stockholm`, `SaoPaulo`, `Johannesburg`, `HongKong`, `Tokyo`, `Chicago`, `Madrid`.
-
-## Presigned uploads
-
-If your storage zone has S3 compatibility enabled, files upload directly from the browser to Bunny Storage — bypassing your server for the file transfer. Your server only handles signing and validation.
-
-```ts
-// Server — no changes needed, the handler auto-detects presign requests
-createBunnyUploadHandler({
-  restrictions: { maxFileSize: "10mb", allowedTypes: ["image/*"] },
-  getPath: (file) => `/uploads/${Date.now()}-${file.name}`,
-});
-```
-
-```ts
-// Client — add presigned: true
-const uploader = createUploader({
-  presigned: true,
-  restrictions: { maxFileSize: "10mb", allowedTypes: ["image/*"] },
-});
-```
-
-> **Note:** Presigned uploads require an S3-compatible storage zone (Frankfurt `de`, New York `ny`, or Singapore `sg`). S3 compatibility must be enabled during zone creation.
-
-## Framework packages
-
-Pair `@bunny.net/upload` with a framework package for your UI:
-
-| Framework | Package | Install |
-|---|---|---|
-| React / Next.js | [`@bunny.net/upload-react`](../react) | `npm install @bunny.net/upload @bunny.net/upload-react @bunny.net/upload-next` |
-| Vue / Nuxt | [`@bunny.net/upload-vue`](../vue) | `npm install @bunny.net/upload @bunny.net/upload-vue @bunny.net/upload-nuxt` |
-| SolidJS / SolidStart | [`@bunny.net/upload-solid`](../solid) | `npm install @bunny.net/upload @bunny.net/upload-solid` |
-| Angular | [`@bunny.net/upload-angular`](../angular) | `npm install @bunny.net/upload @bunny.net/upload-angular` |
-| Vanilla JS | — | `npm install @bunny.net/upload` (use `createDropzone` directly) |
+The name, path, size and type in `onComplete` come from the signed token, not from the client.

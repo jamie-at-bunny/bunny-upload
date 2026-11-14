@@ -95,33 +95,48 @@ Returns an async `(request: Request) => Promise<Response>` handler.
 | `cdnBase` | `string` | `BUNNY_CDN_BASE` | CDN base URL |
 | `storageRegion` | `regions.StorageRegion` | `Falkenstein` | Storage region (re-exported from `@bunny.net/storage-sdk`) |
 
-### Lifecycle hooks
+### `authorize`
 
-All hooks receive the relevant path and the original `Request`. Throw a `FileManagerError` to return an error response.
-
-| Hook | Signature | Description |
-|---|---|---|
-| `onBeforeList` | `(path, req) => void` | Before listing a directory |
-| `onBeforeDelete` | `(path, req) => void` | Before deleting a file or folder |
-| `onBeforeCreateFolder` | `(path, req) => void` | Before creating a folder |
-| `onBeforeDownload` | `(path, req) => void` | Before downloading a file |
-| `onBeforeImport` | `(url, path, req) => void` | Before importing a file from URL |
+A single hook gates every operation. Return `false` to deny with a 403, or throw a `FileManagerError` for a specific status code.
 
 ```ts
 import { createFileManagerHandler, FileManagerError } from "@bunny.net/file-manager-handler";
 
 const handler = createFileManagerHandler({
-  onBeforeList: async (path, req) => {
-    const session = await getSession(req.headers.get("cookie"));
+  authorize: async ({ request, operation, path }) => {
+    const session = await getSession(request.headers.get("cookie"));
     if (!session) throw new FileManagerError("Unauthorized", 401);
-  },
-  onBeforeDelete: async (path, req) => {
-    if (path.startsWith("/protected/")) {
+
+    if (operation === "delete" && path.startsWith("/protected/")) {
       throw new FileManagerError("Cannot delete protected files", 403);
     }
+
+    return true;
   },
 });
 ```
+
+The context shape depends on the operation:
+
+| `operation` | Context fields |
+|---|---|
+| `"list"` | `request`, `path` |
+| `"download"` | `request`, `path` |
+| `"createFolder"` | `request`, `path` |
+| `"delete"` | `request`, `path` |
+| `"importFromUrl"` | `request`, `path`, `url` |
+
+### Deprecated aliases
+
+The previous per-operation hooks still work and map to the corresponding `operation` on `authorize`:
+
+| Deprecated | Use instead |
+|---|---|
+| `onBeforeList(path, req)` | `authorize({ operation: "list", ... })` |
+| `onBeforeDownload(path, req)` | `authorize({ operation: "download", ... })` |
+| `onBeforeCreateFolder(path, req)` | `authorize({ operation: "createFolder", ... })` |
+| `onBeforeDelete(path, req)` | `authorize({ operation: "delete", ... })` |
+| `onBeforeImport(url, path, req)` | `authorize({ operation: "importFromUrl", ... })` |
 
 ## HTTP endpoints
 

@@ -4,20 +4,38 @@
     "access": "public"
   },
   "version": "0.0.2",
-  "description": "Drop-in file uploads for Bunny Storage — client engine + server handler",
+  "description": "File uploads to Bunny Storage: a web-standard server handler, a tiny client, and React bindings",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
-    ".": {
+    "./server": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/server.d.ts",
+        "default": "./dist/server.js"
       },
       "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
+        "types": "./dist/server.d.cts",
+        "default": "./dist/server.cjs"
+      }
+    },
+    "./client": {
+      "import": {
+        "types": "./dist/client.d.ts",
+        "default": "./dist/client.js"
+      },
+      "require": {
+        "types": "./dist/client.d.cts",
+        "default": "./dist/client.cjs"
+      }
+    },
+    "./react": {
+      "import": {
+        "types": "./dist/react.d.ts",
+        "default": "./dist/react.js"
+      },
+      "require": {
+        "types": "./dist/react.d.cts",
+        "default": "./dist/react.cjs"
       }
     }
   },
@@ -27,24 +45,28 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@bunny.net/upload-core": "0.0.2",
-    "@bunny.net/upload-handler": "0.0.2",
-    "@bunny.net/upload-shared": "0.0.2"
+    "zod": "^4.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.0.0",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.5.0"
-  },
-  "keywords": [
-    "bunny",
-    "upload",
-    "storage",
-    "cdn",
-    "file-upload"
-  ],
-  "license": "MIT"
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
 }

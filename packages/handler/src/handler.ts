@@ -9,10 +9,18 @@ import {
   type PresignResponse,
   type CompleteRequest,
 } from "./types";
-import { parseFileSize, matchesMimeType, jsonResponse } from "@bunny.net/upload-shared";
+import {
+  parseFileSize,
+  matchesMimeType,
+  jsonResponse,
+  signUploadToken,
+  verifyUploadToken,
+} from "@bunny.net/upload-shared";
 import * as BunnyStorage from "@bunny.net/storage-sdk";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const DEFAULT_TOKEN_EXPIRY_SECONDS = 3600;
 
 const S3_REGIONS: Record<string, string> = {
   de: "de",
@@ -63,7 +71,49 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
   const cdnBase = options.cdnBase ?? process.env.BUNNY_CDN_BASE;
   const storageRegion = options.storageRegion ?? process.env.BUNNY_STORAGE_REGION;
   const endpointUrl = options.endpointUrl ?? process.env.BUNNY_ENDPOINT_URL;
-  const { restrictions, onBeforeUpload, getPath, onAfterUpload } = options;
+  const {
+    restrictions,
+    authorize,
+    path: pathOption,
+    onComplete,
+    onBeforeUpload,
+    getPath,
+    onAfterUpload,
+    tokenExpirySeconds = DEFAULT_TOKEN_EXPIRY_SECONDS,
+    verifyUploadOnComplete = true,
+  } = options;
+
+  async function runAuthorize(file: FileInfo, request: Request): Promise<void> {
+    if (authorize) {
+      const result = await authorize({ request, file });
+      if (result === false) {
+        throw new UploadError("Unauthorized", 403);
+      }
+      return;
+    }
+    if (onBeforeUpload) {
+      await onBeforeUpload(file, request);
+    }
+  }
+
+  function resolvePath(file: FileInfo, request: Request): string {
+    if (pathOption) return pathOption({ file, request });
+    if (getPath) return getPath(file, request);
+    return `/${file.name}`;
+  }
+
+  async function runOnComplete(
+    result: UploadResult,
+    request: Request
+  ): Promise<void> {
+    if (onComplete) {
+      await onComplete({ file: result, request });
+      return;
+    }
+    if (onAfterUpload) {
+      await onAfterUpload(result, request);
+    }
+  }
 
   if (!storageZone) {
     throw new Error("Missing storageZone. Set it in options or via BUNNY_STORAGE_ZONE env var.");
@@ -126,11 +176,9 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
         return jsonResponse({ error: validationError }, 400);
       }
 
-      if (onBeforeUpload) {
-        await onBeforeUpload(fileInfo, request);
-      }
+      await runAuthorize(fileInfo, request);
 
-      const path = getPath ? getPath(fileInfo, request) : `/${fileInfo.name}`;
+      const path = resolvePath(fileInfo, request);
       const key = path.replace(/^\//, "");
 
       const command = new PutObjectCommand({
@@ -145,11 +193,22 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
         signableHeaders: new Set(["content-type"]),
       });
 
+      const token = await signUploadToken(
+        {
+          p: path,
+          s: fileInfo.size,
+          t: fileInfo.type,
+          exp: Date.now() + tokenExpirySeconds * 1000,
+        },
+        storagePassword!
+      );
+
       results.push({
         name: fileInfo.name,
         path,
         url: makeCdnUrl(path),
         presignedUrl,
+        token,
       });
     }
 
@@ -167,16 +226,49 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
     const results: UploadResult[] = [];
 
     for (const file of completedFiles) {
+      if (!file.token || typeof file.token !== "string") {
+        return jsonResponse({ error: "Missing upload token" }, 400);
+      }
+
+      const payload = await verifyUploadToken(file.token, storagePassword!);
+      if (!payload) {
+        return jsonResponse({ error: "Invalid upload token" }, 400);
+      }
+      if (payload.exp < Date.now()) {
+        return jsonResponse({ error: "Upload token expired" }, 400);
+      }
+      if (payload.p !== file.path || payload.s !== file.size) {
+        return jsonResponse({ error: "Upload token does not match file" }, 400);
+      }
+
+      if (verifyUploadOnComplete) {
+        const key = payload.p.replace(/^\//, "");
+        try {
+          const head = await getS3Client().send(
+            new HeadObjectCommand({ Bucket: storageZone, Key: key })
+          );
+          if (
+            typeof head.ContentLength === "number" &&
+            head.ContentLength !== payload.s
+          ) {
+            return jsonResponse({ error: "Uploaded file size mismatch" }, 400);
+          }
+        } catch {
+          return jsonResponse(
+            { error: "Uploaded file not found in storage" },
+            400
+          );
+        }
+      }
+
       const result: UploadResult = {
         name: file.name,
-        path: file.path,
-        size: file.size,
-        url: makeCdnUrl(file.path),
+        path: payload.p,
+        size: payload.s,
+        url: makeCdnUrl(payload.p),
       };
 
-      if (onAfterUpload) {
-        await onAfterUpload(result, request);
-      }
+      await runOnComplete(result, request);
 
       results.push(result);
     }
@@ -220,11 +312,9 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
         return jsonResponse({ error: validationError }, 400);
       }
 
-      if (onBeforeUpload) {
-        await onBeforeUpload(fileInfo, request);
-      }
+      await runAuthorize(fileInfo, request);
 
-      const path = getPath ? getPath(fileInfo, request) : `/${file.name}`;
+      const path = resolvePath(fileInfo, request);
 
       // Upload to Bunny Storage
       // TODO(@bunny.net/storage-sdk): The SDK types its stream parameter as
@@ -245,9 +335,7 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
         url: makeCdnUrl(path),
       };
 
-      if (onAfterUpload) {
-        await onAfterUpload(result, request);
-      }
+      await runOnComplete(result, request);
 
       results.push(result);
     }
@@ -268,17 +356,17 @@ export function createBunnyUploadHandler(options: HandlerOptions = {}) {
         const body = await request.json();
 
         if (isPresignRequest(body)) {
-          return handlePresign(body, request);
+          return await handlePresign(body, request);
         }
 
         if (isCompleteRequest(body)) {
-          return handleComplete(body, request);
+          return await handleComplete(body, request);
         }
 
         return jsonResponse({ error: "Invalid request" }, 400);
       }
 
-      return handleFormDataUpload(request);
+      return await handleFormDataUpload(request);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
       const status = err instanceof UploadError ? err.statusCode : 500;

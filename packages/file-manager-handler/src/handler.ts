@@ -1,5 +1,6 @@
 import {
   FileManagerError,
+  type FileManagerAuthorizeContext,
   type FileManagerHandlerOptions,
   type StorageEntry,
 } from "./types";
@@ -85,6 +86,36 @@ export function createFileManagerHandler(
     storagePassword
   );
 
+  async function runAuthorize(
+    ctx: FileManagerAuthorizeContext
+  ): Promise<void> {
+    if (options.authorize) {
+      const result = await options.authorize(ctx);
+      if (result === false) {
+        throw new FileManagerError("Unauthorized", 403);
+      }
+      return;
+    }
+
+    switch (ctx.operation) {
+      case "list":
+        if (options.onBeforeList) await options.onBeforeList(ctx.path, ctx.request);
+        return;
+      case "download":
+        if (options.onBeforeDownload) await options.onBeforeDownload(ctx.path, ctx.request);
+        return;
+      case "createFolder":
+        if (options.onBeforeCreateFolder) await options.onBeforeCreateFolder(ctx.path, ctx.request);
+        return;
+      case "delete":
+        if (options.onBeforeDelete) await options.onBeforeDelete(ctx.path, ctx.request);
+        return;
+      case "importFromUrl":
+        if (options.onBeforeImport) await options.onBeforeImport(ctx.url, ctx.path, ctx.request);
+        return;
+    }
+  }
+
   return async function handler(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const path = url.searchParams.get("path") ?? "/";
@@ -97,9 +128,11 @@ export function createFileManagerHandler(
 
           if (download) {
             // Download a file
-            if (options.onBeforeDownload) {
-              await options.onBeforeDownload(normalizedPath, request);
-            }
+            await runAuthorize({
+              request,
+              operation: "download",
+              path: normalizedPath,
+            });
 
             const result = await BunnyStorage.file.download(
               sz,
@@ -121,9 +154,11 @@ export function createFileManagerHandler(
           }
 
           // List directory
-          if (options.onBeforeList) {
-            await options.onBeforeList(normalizedPath, request);
-          }
+          await runAuthorize({
+            request,
+            operation: "list",
+            path: normalizedPath,
+          });
 
           const files = await BunnyStorage.file.list(sz, normalizedPath);
           const entries: StorageEntry[] = files.map((f) =>
@@ -151,9 +186,11 @@ export function createFileManagerHandler(
 
           const normalizedFolderPath = normalizePath(folderPath);
 
-          if (options.onBeforeCreateFolder) {
-            await options.onBeforeCreateFolder(normalizedFolderPath, request);
-          }
+          await runAuthorize({
+            request,
+            operation: "createFolder",
+            path: normalizedFolderPath,
+          });
 
           await BunnyStorage.file.createDirectory(sz, normalizedFolderPath);
 
@@ -165,9 +202,11 @@ export function createFileManagerHandler(
 
         case "DELETE": {
           // Delete file or folder
-          if (options.onBeforeDelete) {
-            await options.onBeforeDelete(normalizedPath, request);
-          }
+          await runAuthorize({
+            request,
+            operation: "delete",
+            path: normalizedPath,
+          });
 
           // Trailing slash = directory
           if (normalizedPath.endsWith("/")) {
@@ -203,9 +242,12 @@ export function createFileManagerHandler(
 
           const normalizedDestPath = normalizePath(destPath);
 
-          if (options.onBeforeImport) {
-            await options.onBeforeImport(sourceUrl, normalizedDestPath, request);
-          }
+          await runAuthorize({
+            request,
+            operation: "importFromUrl",
+            path: normalizedDestPath,
+            url: sourceUrl,
+          });
 
           // Normalize the source URL (handles spaces and special characters)
           let normalizedSourceUrl: string;

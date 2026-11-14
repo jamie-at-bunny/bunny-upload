@@ -15,3 +15,5 @@ export type {
 } from "./types";
 export { defaultLocale, resolveLocale } from "./locale";
 export type { BunnyUploadLocale } from "./locale";
+export { signUploadToken, verifyUploadToken } from "./upload-token";
+export type { UploadTokenPayload } from "./upload-token";

@@ -12,4 +12,7 @@ export type {
   PresignResult,
   PresignResponse,
   CompleteRequest,
+  UploadAuthorizeContext,
+  UploadPathContext,
+  UploadCompleteContext,
 } from "./types";

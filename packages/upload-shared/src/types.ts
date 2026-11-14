@@ -16,6 +16,12 @@ export interface PresignResult {
   path: string;
   url: string;
   presignedUrl: string;
+  /**
+   * Short-lived HMAC token binding this upload's path/size/contentType.
+   * The client must echo this back in the complete request so the server
+   * can verify the upload was authorized and the metadata wasn't tampered.
+   */
+  token: string;
 }
 
 export interface PresignResponse {

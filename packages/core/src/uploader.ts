@@ -14,6 +14,27 @@ import { generateId, matchesMimeType, parseFileSize } from "./utils";
 const DEFAULT_RETRIES = 3;
 const INITIAL_BACKOFF_MS = 1000;
 
+class HttpError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+  }
+}
+
+function httpError(xhr: XMLHttpRequest): HttpError {
+  let message = `Upload failed with status ${xhr.status}`;
+  try {
+    const body = JSON.parse(xhr.responseText);
+    if (typeof body?.error === "string") message = body.error;
+  } catch {}
+  return new HttpError(message, xhr.status);
+}
+
+/** Retry network failures and 5xx responses; a 4xx won't succeed on retry. */
+function isRetryable(err: unknown): boolean {
+  if (err instanceof HttpError) return err.status >= 500;
+  return !(err instanceof Error && err.message === "Upload aborted");
+}
+
 export class Uploader {
   private files = new Map<string, FileState>();
   private emitter = new Emitter<EventMap>();
@@ -156,7 +177,12 @@ export class Uploader {
 
     // Step 2: Upload each file directly to S3 using the presigned URL
     const results: UploadResult[] = [];
-    const completed: { name: string; path: string; size: number }[] = [];
+    const completed: {
+      name: string;
+      path: string;
+      size: number;
+      token: string;
+    }[] = [];
 
     for (let i = 0; i < filesToUpload.length; i++) {
       const fileState = filesToUpload[i];
@@ -173,7 +199,12 @@ export class Uploader {
         };
 
         results.push(result);
-        completed.push({ name: presign.name, path: presign.path, size: fileState.size });
+        completed.push({
+          name: presign.name,
+          path: presign.path,
+          size: fileState.size,
+          token: presign.token,
+        });
 
         this.updateFile(fileState.id, {
           status: "complete",
@@ -193,13 +224,23 @@ export class Uploader {
 
     // Step 3: Notify the server that uploads are complete
     if (completed.length > 0) {
-      await fetch(this.endpoint, {
+      const completeResponse = await fetch(this.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ complete: true, files: completed }),
-      }).catch(() => {
-        // Completion notification is best-effort — files are already in S3
-      });
+      }).catch(() => null);
+
+      if (!completeResponse?.ok) {
+        const errorData = await completeResponse?.json().catch(() => null);
+        const message =
+          errorData?.error ?? "Upload could not be confirmed by the server";
+        for (const file of filesToUpload) {
+          if (this.files.get(file.id)?.status !== "complete") continue;
+          this.updateFile(file.id, { status: "error", error: message, url: undefined });
+          this.emitter.emit("error", new Error(message), this.files.get(file.id));
+        }
+        return [];
+      }
 
       this.emitter.emit("complete", results);
     }
@@ -219,6 +260,7 @@ export class Uploader {
         return await this.uploadToPresignedUrl(fileState, presignedUrl);
       } catch (err) {
         lastError = err instanceof Error ? err : new Error("Upload failed");
+        if (!isRetryable(err)) break;
         if (attempt < retries) {
           const delay = INITIAL_BACKOFF_MS * Math.pow(2, attempt);
           await new Promise((resolve) => setTimeout(resolve, delay));
@@ -245,7 +287,7 @@ export class Uploader {
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve();
         } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
+          reject(httpError(xhr));
         }
       });
 
@@ -305,6 +347,7 @@ export class Uploader {
         return await this.uploadFile(file);
       } catch (err) {
         lastError = err instanceof Error ? err : new Error("Upload failed");
+        if (!isRetryable(err)) break;
 
         if (attempt < retries) {
           const delay = INITIAL_BACKOFF_MS * Math.pow(2, attempt);
@@ -340,7 +383,7 @@ export class Uploader {
             reject(new Error("Invalid response from server"));
           }
         } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
+          reject(httpError(xhr));
         }
       });
 

@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload";
+import { createBunnyUploadHandler, UploadError } from "@bunny.net/upload-handler";
 
 const handler = createBunnyUploadHandler({
   restrictions: {

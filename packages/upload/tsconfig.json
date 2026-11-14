@@ -2,7 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": ".",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": { "@bunny.net/upload/client": ["./src/client.ts"] }
   },
-  "include": ["src"]
+  "include": ["src", "test"]
 }

@@ -14,7 +14,7 @@ import {
 export default function Home() {
   return (
     <main style={{ maxWidth: 640, margin: "40px auto", padding: "0 20px" }}>
-      <h1>Bunny Upload — Next.js</h1>
+      <h1>Bunny Upload — Next Example</h1>
 
       <Section title="Simple Button" description="Pick a file and see its name + upload status inline.">
         <BunnyUpload
